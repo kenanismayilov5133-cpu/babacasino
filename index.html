@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BABA KAZİNO | Pro Edition</title>
+    <title>BABA KAZİNO | Ultra Edition</title>
     <style>
         :root { --gold: #d4af37; --red: #ff0000; --neon: #00f3ff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
@@ -22,21 +22,24 @@
         .reel-col { width: 19%; height: 350px; background: rgba(20,20,20,0.95); border: 2px solid #333; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; position: relative; overflow: hidden; }
         .symbol { font-size: 50px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); transition: 0.1s; z-index: 2; }
 
-        /* UDUŞ XƏTLƏRİ (SVG) */
-        #win-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; display: none; }
-        .win-path { stroke: var(--gold); stroke-width: 6; fill: none; stroke-linecap: round; filter: drop-shadow(0 0 8px gold); animation: dash 0.5s infinite; }
-        @keyframes dash { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 100% { transform: translate(1px, -2px) rotate(0deg); } }
 
-        /* DASHBOARD */
+        #win-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; display: none; }
+        .win-path { stroke: var(--gold); stroke-width: 6; fill: none; stroke-linecap: round; filter: drop-shadow(0 0 12px gold); animation: dash 0.5s infinite; }
+        @keyframes dash { 0% { opacity: 1; stroke-width: 6; } 50% { opacity: 0.5; stroke-width: 10; } }
+
         .dash { background: #111; display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; border-top: 2px solid #222; text-align: center; }
         .info-box span { display: block; font-size: 10px; color: #888; }
         .info-box strong { font-size: 18px; color: var(--gold); }
+        .editable-bet { border: 1px dashed var(--gold); padding: 2px; border-radius: 4px; }
 
-        /* KONTROL PANELİ */
-        .controls { background: #000; padding: 20px; display: flex; justify-content: space-around; align-items: center; }
-        .btn-main { width: 110px; height: 110px; border-radius: 50%; border: 6px solid #fff; background: radial-gradient(#2ecc71, #1b5e20); color: white; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(0,255,0,0.4); transition: 0.2s; }
-        .btn-main.stop { background: radial-gradient(#e74c3c, #962d22); box-shadow: 0 0 20px rgba(255,0,0,0.4); }
-        .btn-main.take { background: radial-gradient(#f1c40f, #f39c12); color: #000; animation: pulse 0.5s infinite; border-color: #000; }
+        .controls { background: #000; padding: 15px; display: flex; justify-content: space-around; align-items: center; gap: 10px; }
+        .btn-main { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; background: radial-gradient(#2ecc71, #1b5e20); color: white; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(0,255,0,0.4); transition: 0.2s; }
+        .btn-main.stop { background: radial-gradient(#e74c3c, #962d22); }
+        .btn-main.take { background: radial-gradient(#f1c40f, #f39c12); color: #000; animation: pulse 0.5s infinite; }
+        .btn-auto { width: 60px; height: 60px; border-radius: 10px; background: #222; border: 2px solid #444; color: #fff; font-size: 10px; cursor: pointer; }
+        .btn-auto.active { background: #00f3ff; color: #000; border-color: #fff; box-shadow: 0 0 15px #00f3ff; }
         
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } }
     </style>
@@ -50,7 +53,7 @@
     </div>
 
     <div id="game-area">
-        <div class="reels-container">
+        <div class="reels-container" id="main-stage">
             <svg id="win-lines"></svg>
             <div class="reel-col" id="r1"></div>
             <div class="reel-col" id="r2"></div>
@@ -62,48 +65,55 @@
         <div class="dash">
             <div class="info-box"><span>BALANS</span><strong id="bal-text">118.00</strong></div>
             <div class="info-box"><span>UDUŞ</span><strong id="win-text">0.00</strong></div>
-            <div class="info-box"><span>MƏRC</span><strong id="bet-text">1.00</strong></div>
+            <div class="info-box" onclick="manualBet()"><span>MƏRC (Dəyiş)</span><strong id="bet-text" class="editable-bet">1.00</strong></div>
         </div>
 
         <div class="controls">
-            <button class="num-btn" style="width:60px; height:45px; font-size:12px" onclick="adjBet(-0.2)">BET-</button>
+            <button id="auto-btn" class="btn-auto" onclick="toggleAuto()">AUTO<br>OFF</button>
             <button id="main-btn" class="btn-main" onclick="handleAction()">START</button>
-            <button class="num-btn" style="width:60px; height:45px; font-size:12px" onclick="adjBet(0.2)">BET+</button>
+            <button class="num-btn" style="width:60px; height:60px; font-size:12px; background: #c0392b" onclick="location.reload()">ÇIXIŞ</button>
         </div>
     </div>
 
     <script>
         const symbols = ["🍎", "🍋", "🍒", "🍇", "7️⃣", "🍉", "⭐"];
-        const s_spin = new Audio('https://actions.google.com/sounds/v1/foley/sliding_door_open.ogg');
+        const s_spin = new Audio('https://freesound.org/data/previews/120/120373_824230-lq.mp3');
         const s_stop = new Audio('https://actions.google.com/sounds/v1/foley/button_click.ogg');
-        const s_win = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+        const s_win = new Audio('https://freesound.org/data/previews/387/387232_1474204-lq.mp3');
+        const s_star_win = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); // Ulduz üçün özəl səs
         const s_take = new Audio('https://actions.google.com/sounds/v1/cartoon/clink_clank.ogg');
 
         let balance = 118.00;
         let bet = 1.00;
         let pendingWin = 0;
-        let masterCode = "12345678901234";
-        let winRate = 40; 
+        let masterCode = localStorage.getItem('babaCode') || "12345678901234";
+        let winRate = 30; 
+        let starCounter = 0; 
         let state = "IDLE"; 
         let timers = [];
+        let autoMode = false;
 
         const padItems = ['1','2','3','4','5','6','7','8','9','C','0','OK'];
         padItems.forEach(v => {
             const b = document.createElement('button'); b.className = 'num-btn'; b.innerText = v;
-            b.onclick = () => { if(v==='C') document.getElementById('display').innerText='****'; else if(v==='OK') login(); else { let d=document.getElementById('display'); if(d.innerText=='****') d.innerText=v; else d.innerText+=v; } };
+            b.onclick = () => { 
+                let d = document.getElementById('display');
+                if(v==='C') d.innerText='****'; 
+                else if(v==='OK') login(); 
+                else { if(d.innerText=='****') d.innerText=v; else d.innerText+=v; } 
+            };
             document.getElementById('pad').appendChild(b);
         });
 
         function login() { if(document.getElementById('display').innerText === masterCode) { document.getElementById('login-screen').style.display='none'; document.getElementById('game-area').style.display='flex'; init(); } }
-        function unlockAudio() { [s_spin, s_stop, s_win, s_take].forEach(s => { s.play(); s.pause(); }); }
+        function unlockAudio() { [s_spin, s_stop, s_win, s_take, s_star_win].forEach(s => { s.play(); s.pause(); }); }
         function init() { for(let i=1;i<=5;i++) fill(i); }
         function fill(id) { let r=document.getElementById('r'+id); r.innerHTML=`<div class="symbol">${symbols[rand()]}</div><div class="symbol">${symbols[rand()]}</div><div class="symbol">${symbols[rand()]}</div>`; }
         function rand() { return Math.floor(Math.random()*symbols.length); }
 
         function handleAction() {
-            const btn = document.getElementById('main-btn');
             if(state === "IDLE") {
-                if(balance < bet) return;
+                if(balance < bet) { autoMode = false; updateUI(); alert("Balans yetərli deyil!"); return; }
                 startSpin();
             } else if(state === "SPINNING") {
                 forceStop();
@@ -116,15 +126,21 @@
             state = "SPINNING";
             balance -= bet;
             pendingWin = 0;
+            starCounter++; 
             updateUI();
             document.getElementById('win-lines').style.display = 'none';
+            document.getElementById('main-stage').classList.remove('shake');
+            
             const btn = document.getElementById('main-btn');
             btn.innerText = "STOP"; btn.className = "btn-main stop";
+            
+            s_spin.loop = true;
+            s_spin.currentTime = 0;
             s_spin.play();
 
             for(let i=1; i<=5; i++) {
                 timers[i] = setInterval(() => fill(i), 70);
-                timers[i+5] = setTimeout(() => stopReel(i), 1000 + (i*400));
+                timers[i+5] = setTimeout(() => stopReel(i), 800 + (i*300));
             }
         }
 
@@ -132,64 +148,134 @@
             if(state !== "SPINNING") return;
             clearInterval(timers[id]);
             s_stop.play();
-            if(id === 5) checkWin();
+            if(id === 5) {
+                s_spin.pause();
+                s_spin.loop = false;
+                checkWin();
+            }
         }
 
         function forceStop() {
             for(let i=1; i<=10; i++) { clearInterval(timers[i]); clearTimeout(timers[i]); }
             for(let i=1; i<=5; i++) fill(i);
+            s_spin.pause();
+            s_spin.loop = false;
             s_stop.play();
             checkWin();
         }
 
         function checkWin() {
             state = "IDLE";
-            let isWin = (Math.random() * 100) < winRate;
-            const btn = document.getElementById('main-btn');
+            let btn = document.getElementById('main-btn');
+            let isStarWin = false;
+            let isSevenWin = false;
 
-            if(isWin) {
+            if(Math.random() * 100 < 2) isSevenWin = true;
+
+            if(!isSevenWin && starCounter >= (Math.floor(Math.random()*6)+15)) {
+                isStarWin = true;
+                starCounter = 0;
+            }
+
+            if(isSevenWin) {
                 state = "WINNING";
-                pendingWin = bet * (Math.floor(Math.random()*5)+2);
-                drawWinLines();
-                btn.innerText = "TAKE";
-                btn.className = "btn-main take";
-                s_win.play();
+                pendingWin = bet * 20; 
+                for(let i=1; i<=4; i++) {
+                    document.getElementById('r'+i).innerHTML = `<div class="symbol">7️⃣</div><div class="symbol">7️⃣</div><div class="symbol">7️⃣</div>`;
+                }
+                showWinEffects(false);
+            } else if(isStarWin) {
+                state = "WINNING";
+                pendingWin = bet * 2; // ULDUZ UDUŞU 2 QAT OLDU
+                for(let i=1; i<=3; i++) { // MAKSİMUM 3 ULDUZ DÜŞÜR
+                    document.getElementById('r'+i).innerHTML = `<div class="symbol">⭐</div><div class="symbol">⭐</div><div class="symbol">⭐</div>`;
+                }
+                for(let i=4; i<=5; i++) fill(i); // QALANLARI QARIŞIQ ET
+                showWinEffects(true); // ULDUZ ÜÇÜN ÖZƏL SƏS VƏ EFFEKT
+            } else if((Math.random() * 100) < winRate) {
+                state = "WINNING";
+                pendingWin = bet * (Math.floor(Math.random()*5)+1.5);
+                showWinEffects(false);
             } else {
                 btn.innerText = "START";
                 btn.className = "btn-main";
+                if(autoMode) setTimeout(handleAction, 500);
             }
             updateUI();
         }
 
+        function showWinEffects(isStar) {
+            let btn = document.getElementById('main-btn');
+            drawWinLines();
+            document.getElementById('main-stage').classList.add('shake');
+            btn.innerText = "TAKE";
+            btn.className = "btn-main take";
+            
+            if(isStar) s_star_win.play(); // Ulduz gələndə fərqli səs
+            else s_win.play();
+            
+            if(autoMode) setTimeout(takeMoney, 1000);
+        }
+
         function drawWinLines() {
             const svg = document.getElementById('win-lines');
-            svg.innerHTML = `
-                <path class="win-path" d="M 0 100 L 1000 100" />
-                <path class="win-path" d="M 0 200 L 1000 200" />
-                <path class="win-path" d="M 0 50 L 500 350 L 1000 50" />
-            `;
+            svg.innerHTML = `<path class="win-path" d="M 0 100 L 1000 100" />
+                             <path class="win-path" d="M 0 200 L 1000 200" />
+                             <path class="win-path" d="M 0 175 L 500 25 L 1000 175" />`;
             svg.style.display = 'block';
         }
 
         function takeMoney() {
+            if(pendingWin <= 0) return;
             s_take.play();
             balance += pendingWin;
             pendingWin = 0;
             state = "IDLE";
             document.getElementById('win-lines').style.display = 'none';
+            document.getElementById('main-stage').classList.remove('shake');
             const btn = document.getElementById('main-btn');
             btn.innerText = "START";
             btn.className = "btn-main";
             updateUI();
+            if(autoMode) setTimeout(handleAction, 500);
         }
 
-        function adjBet(v) { if(state==="IDLE") { bet=Math.max(0.2, bet+v); updateUI(); } }
+        function toggleAuto() {
+            autoMode = !autoMode;
+            const btn = document.getElementById('auto-btn');
+            btn.innerText = autoMode ? "AUTO\nON" : "AUTO\nOFF";
+            btn.className = autoMode ? "btn-auto active" : "btn-auto";
+            if(autoMode && state === "IDLE") handleAction();
+        }
+
+        function manualBet() {
+            if(state !== "IDLE") return;
+            let newBet = prompt("Mərc məbləğini yaz:", bet);
+            if(newBet && !isNaN(newBet) && newBet > 0) { bet = parseFloat(newBet); updateUI(); }
+        }
+
         function updateUI() { 
             document.getElementById('bal-text').innerText = balance.toFixed(2); 
             document.getElementById('win-text').innerText = pendingWin.toFixed(2);
             document.getElementById('bet-text').innerText = bet.toFixed(2);
         }
-        function openAdmin() { let p=prompt('Pass:'); if(p=='777') winRate=prompt('Win %:', winRate); }
+
+        function openAdmin() { 
+            let p = prompt('Admin Panel Şifrəsi:'); 
+            if(p == '777') {
+                let action = prompt("1: Uduş Şansı Değiş\n2: Balans Değiş\n3: Giriş Şifrəsini Değiş");
+                if(action == "1") winRate = prompt('Uduş Şansı %:', winRate);
+                if(action == "2") { balance = parseFloat(prompt('Yeni Balans:', balance)); updateUI(); }
+                if(action == "3") {
+                    let newCode = prompt("Yeni giriş şifrəsini yaz:", masterCode);
+                    if(newCode) {
+                        masterCode = newCode;
+                        localStorage.setItem('babaCode', newCode);
+                        alert("Giriş kodu uğurla dəyişdi!");
+                    }
+                }
+            } 
+        }
     </script>
 </body>
 </html>
