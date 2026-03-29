@@ -3,31 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BABA KAZİNO | GitHub Version</title>
+    <title>BABA KAZİNO | Ultra Edition</title>
     <style>
-        :root { --gold: #ffcc00; }
+        :root { --gold: #ffcc00; --neon: #39ff14; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
         body { background: #000; color: white; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
         #game-container { width: 100%; max-width: 800px; background: #000; padding: 10px; border-radius: 15px; }
 
-        /* Makaralar */
+        /* Slot Makaraları - Şəkildəki kimi qara və səliqəli */
         .reels-wrapper { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; position: relative; }
         .reel-col { width: 18%; height: 360px; background: linear-gradient(180deg, #111, #222, #111); border: 1px solid #333; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
         .symbol { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .symbol img { width: 90px; height: 90px; object-fit: contain; }
+        .symbol img { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,100,0,0.3)); }
 
-        /* Panel */
+        /* Panel - Kredit, Udulub, Bahis */
         .dash { display: grid; grid-template-columns: repeat(3, 1fr); background: #0a0a0a; border-top: 1px solid #444; border-bottom: 1px solid #444; padding: 15px 0; margin-bottom: 20px; }
         .info-item { text-align: center; border-right: 1px solid #222; }
         .info-item:last-child { border-right: none; }
-        .info-item span { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .info-item span { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
         .info-item strong { display: block; font-size: 22px; color: var(--gold); }
+        .sub-val { font-size: 10px; color: #666; }
 
-        /* Düymələr */
+        /* Düymələr - Yaşıl START və digərləri */
         .controls { display: flex; justify-content: space-around; align-items: center; }
+        .btn-side { width: 70px; height: 70px; border-radius: 12px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-start { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(#39ff14, #1b5e20); color: white; border: 5px solid #fff; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
-        .btn-side { background: #222; color: #fff; border: 1px solid #444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .btn-start:active { transform: scale(0.95); }
+        .btn-exit { background: #500; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -42,39 +45,51 @@
         </div>
 
         <div class="dash">
-            <div class="info-item"><span>Kredit</span><strong id="bal-text">170.00</strong></div>
-            <div class="info-item"><span>Udulub</span><strong id="win-text">0.00</strong></div>
-            <div class="info-item"><span>Bahis</span><strong id="bet-text">2.00</strong></div>
+            <div class="info-item">
+                <span>KREDİT</span>
+                <strong id="bal-val">17000</strong>
+                <span class="sub-val">170.00 AZN</span>
+            </div>
+            <div class="info-item">
+                <span>UDULUB</span>
+                <strong id="win-val">0</strong>
+                <span class="sub-val">0.00 AZN</span>
+            </div>
+            <div class="info-item">
+                <span>BAHİS</span>
+                <strong id="bet-val">200</strong>
+                <span class="sub-val">2.00 AZN</span>
+            </div>
         </div>
 
         <div class="controls">
             <button class="btn-side">AVTO</button>
             <button class="btn-start" onclick="spin()">START</button>
-            <button class="btn-side" style="background:#c0392b;">ÇIXIŞ</button>
+            <button class="btn-exit" onclick="location.reload()">ÇIXIŞ</button>
         </div>
     </div>
 
     <script>
-        // GitHub-dakı real fayl adlarını bura yazdım (image_436100.jpg-ə əsasən)
+        // Sənin GitHub-dakı real fayl adların
         const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
         
-        const symbols = [
-            baseUrl + "7.png.jpeg",
-            baseUrl + "gavali.png.jpeg",
-            baseUrl + "limon.png.jpeg",
-            baseUrl + "portagal.png.jpeg",
-            baseUrl + "qarpiz.png.jpeg",
-            baseUrl + "ulduz.png.jpeg",
-            baseUrl + "uzum.png.jpeg"
+        const items = [
+            "7.png.jpeg",
+            "gavali.png.jpeg",
+            "limon.png.jpeg",
+            "portagal.png.jpeg",
+            "qarpiz.png.jpeg",
+            "ulduz.png.jpeg",
+            "uzum.png.jpeg"
         ];
 
-        function fillReels() {
+        function initReels() {
             for(let i=1; i<=5; i++) {
                 const reel = document.getElementById('r'+i);
                 reel.innerHTML = '';
                 for(let j=0; j<3; j++) {
-                    const imgUrl = symbols[Math.floor(Math.random() * symbols.length)];
-                    reel.innerHTML += `<div class="symbol"><img src="${imgUrl}"></div>`;
+                    const name = items[Math.floor(Math.random() * items.length)];
+                    reel.innerHTML += `<div class="symbol"><img src="${baseUrl + name}"></div>`;
                 }
             }
         }
@@ -82,13 +97,13 @@
         function spin() {
             let count = 0;
             const timer = setInterval(() => {
-                fillReels();
+                initReels();
                 count++;
-                if(count > 10) clearInterval(timer);
-            }, 100);
+                if(count > 12) clearInterval(timer);
+            }, 80);
         }
 
-        window.onload = fillReels;
+        window.onload = initReels;
     </script>
 </body>
 </html>
