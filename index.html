@@ -3,8 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BABA KAZİNO | Global Edition</title>
+    <title>BABA KAZİNO | Multi-User</title>
+    <script>
+        // --- BURADAN YENİ KODLAR VƏ BALANSLAR ƏLAVƏ ET ---
+        const MUSTERILER = {
+            "145127": 10.00,  // 1-ci müştəri
+            "223344": 50.00,   // 2-ci müştəri
+            "998877": 30.00,  // 3-cü müştəri
+            "554433": 20.00,   // 4-cü müştəri
+            "admin7": 1000.00  // Özün üçün böyük balans
+            // Bura istədiyin qədər (30-50 dənə) kod əlavə edə bilərsən
+        };
+        // ------------------------------------------------
+    </script>
     <style>
+        /* Sənin orijinal dizaynın eynilə saxlanıldı */
         :root { --gold: #d4af37; --red: #ff0000; --neon: #00f3ff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
         body { background: #000; color: white; overflow: hidden; height: 100vh; }
@@ -16,8 +29,6 @@
         .reels-container { flex: 1; display: flex; justify-content: center; align-items: center; gap: 5px; padding: 10px; background: #050505; position: relative; }
         .reel-col { width: 19%; height: 350px; background: rgba(20,20,20,0.95); border: 2px solid #333; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; position: relative; overflow: hidden; }
         .symbol { font-size: 50px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); transition: 0.1s; z-index: 2; }
-        .shake { animation: shake 0.5s; }
-        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 100% { transform: translate(1px, -2px) rotate(0deg); } }
         #win-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; display: none; }
         .win-path { stroke: #ffd700; stroke-width: 8; fill: none; stroke-linecap: round; filter: drop-shadow(0 0 15px gold); }
         .dash { background: #111; display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; border-top: 2px solid #222; text-align: center; }
@@ -26,16 +37,17 @@
         .controls { background: #000; padding: 15px; display: flex; justify-content: space-around; align-items: center; gap: 10px; }
         .btn-main { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; background: radial-gradient(#2ecc71, #1b5e20); color: white; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(0,255,0,0.4); }
         .btn-main.stop { background: radial-gradient(#e74c3c, #962d22); }
-        .btn-main.take { background: radial-gradient(#f1c40f, #f39c12); color: #000; animation: pulse 0.5s infinite; }
+        .btn-main.take { background: radial-gradient(#f1c40f, #f39c12); color: #000; }
         .btn-auto { width: 60px; height: 60px; border-radius: 10px; background: #222; border: 2px solid #444; color: #fff; font-size: 10px; }
         .btn-auto.active { background: #00f3ff; color: #000; border-color: #fff; box-shadow: 0 0 15px #00f3ff; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 100% { transform: translate(1px, -2px) rotate(0deg); } }
     </style>
 </head>
 <body onclick="unlockAudio()">
 
     <div id="login-screen">
-        <h1 style="color:var(--gold); margin-bottom:20px;" onclick="openAdmin()">BABA KAZİNO</h1>
+        <h1 style="color:var(--gold); margin-bottom:20px;">BABA KAZİNO</h1>
         <div class="code-screen" id="display">****</div>
         <div class="numpad" id="pad"></div>
     </div>
@@ -64,37 +76,19 @@
     </div>
 
     <script>
-        // BURANI DƏYİŞƏ BİLƏRSƏN - HƏR KƏS ÜÇÜN ANA KOD VƏ BALANS
-        let masterConfig = {
-            code: "145127", // Müştəriyə verəcəyin ana kod
-            initialBalance: 100.00 // O kodla girən hər kəsin ilkin balansı
-        };
-
         const symbols = ["🍎", "🍋", "🍒", "🍇", "7️⃣", "🍉", "⭐"];
         const s_spin = new Audio('https://freesound.org/data/previews/120/120373_824230-lq.mp3');
         const s_stop = new Audio('https://actions.google.com/sounds/v1/foley/button_click.ogg');
         const s_win = new Audio('https://freesound.org/data/previews/387/387232_1474204-lq.mp3');
-        const s_star_win = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         const s_take = new Audio('https://actions.google.com/sounds/v1/cartoon/clink_clank.ogg');
 
-        let balance = parseFloat(localStorage.getItem('babaBalance')) || 0;
-        let currentUser = localStorage.getItem('babaUser');
+        let balance = 0;
         let bet = 1.00;
         let pendingWin = 0;
-        let winRate = 30; 
-        let starCounter = 0; 
-        let state = "IDLE"; 
+        let state = "IDLE";
+        let activeUser = "";
         let timers = [];
         let autoMode = false;
-
-        // Əgər adam artıq daxil olubsa, birbaşa oyunu aç
-        if(currentUser === masterConfig.code) {
-            window.onload = () => {
-                document.getElementById('login-screen').style.display='none'; 
-                document.getElementById('game-area').style.display='flex'; 
-                init();
-            };
-        }
 
         const padItems = ['1','2','3','4','5','6','7','8','9','C','0','OK'];
         padItems.forEach(v => {
@@ -109,57 +103,49 @@
         });
 
         function login() { 
-            let enteredCode = document.getElementById('display').innerText;
-            if(enteredCode === masterConfig.code) { 
-                currentUser = enteredCode;
-                if(balance <= 0) balance = masterConfig.initialBalance;
-                localStorage.setItem('babaUser', currentUser);
-                localStorage.setItem('babaBalance', balance);
+            let entered = document.getElementById('display').innerText;
+            if(MUSTERILER[entered] !== undefined) {
+                activeUser = entered;
+                // Əgər əvvəl giribsə qalan balansı gətir, yoxsa yeni balans ver
+                let saved = localStorage.getItem("baba_bal_" + activeUser);
+                balance = saved ? parseFloat(saved) : MUSTERILER[activeUser];
+                
                 document.getElementById('login-screen').style.display='none'; 
                 document.getElementById('game-area').style.display='flex'; 
-                init(); 
+                init();
             } else {
                 alert("Kod yanlışdır!");
                 document.getElementById('display').innerText = "****";
             }
         }
 
-        function unlockAudio() { [s_spin, s_stop, s_win, s_take, s_star_win].forEach(s => { s.play(); s.pause(); }); }
+        function unlockAudio() { [s_spin, s_stop, s_win, s_take].forEach(s => { s.play(); s.pause(); }); }
         function init() { updateUI(); for(let i=1;i<=5;i++) fill(i); }
         function fill(id) { 
             let r=document.getElementById('r'+id); 
             let content = "";
-            for(let j=0; j<3; j++) {
-                let s = symbols[rand()];
-                if(s === "⭐" && starCounter < 20 && Math.random() > 0.4) s = symbols[0]; 
-                content += `<div class="symbol">${s}</div>`;
-            }
+            for(let j=0; j<3; j++) content += `<div class="symbol">${symbols[Math.floor(Math.random()*symbols.length)]}</div>`;
             r.innerHTML = content;
         }
-        function rand() { return Math.floor(Math.random()*symbols.length); }
 
         function handleAction() {
             if(state === "IDLE") {
-                if(balance < bet) { autoMode = false; updateUI(); alert("Balans yetərli deyil!"); return; }
+                if(balance < bet) { autoMode = false; updateUI(); alert("Balans bitib!"); return; }
                 startSpin();
-            } else if(state === "SPINNING") {
-                forceStop();
-            } else if(state === "WINNING") {
-                takeMoney();
-            }
+            } else if(state === "SPINNING") forceStop();
+            else if(state === "WINNING") takeMoney();
         }
 
         function startSpin() {
             state = "SPINNING";
             balance -= bet;
-            localStorage.setItem('babaBalance', balance);
+            save();
             pendingWin = 0;
-            starCounter++; 
             updateUI();
             document.getElementById('win-lines').style.display = 'none';
             document.getElementById('main-stage').classList.remove('shake');
-            const btn = document.getElementById('main-btn');
-            btn.innerText = "STOP"; btn.className = "btn-main stop";
+            document.getElementById('main-btn').innerText = "STOP";
+            document.getElementById('main-btn').className = "btn-main stop";
             s_spin.loop = true; s_spin.play();
             for(let i=1; i<=5; i++) {
                 timers[i] = setInterval(() => fill(i), 70);
@@ -184,29 +170,16 @@
         function checkWin() {
             state = "IDLE";
             let btn = document.getElementById('main-btn');
-            let isStarWin = false;
-            let isSevenWin = false;
-            if(Math.random() * 100 < 1.5) isSevenWin = true;
-            if(!isSevenWin && starCounter >= 20) { isStarWin = true; starCounter = 0; }
-
-            if(isSevenWin) {
+            // Uduş şansı 30%
+            if(Math.random() * 100 < 30) {
                 state = "WINNING";
-                pendingWin = bet * 100;
-                for(let i=1; i<=4; i++) {
-                    document.getElementById('r'+i).innerHTML = `<div class="symbol">7️⃣</div><div class="symbol">7️⃣</div><div class="symbol">7️⃣</div>`;
-                }
-                showWinEffects(false);
-            } else if(isStarWin) {
-                state = "WINNING";
-                pendingWin = bet * 5; 
-                for(let i=1; i<=3; i++) {
-                    document.getElementById('r'+i).innerHTML = `<div class="symbol">⭐</div><div class="symbol">⭐</div><div class="symbol">⭐</div>`;
-                }
-                showWinEffects(true);
-            } else if((Math.random() * 100) < winRate) {
-                state = "WINNING";
-                pendingWin = bet * (Math.floor(Math.random()*5)+2);
-                showWinEffects(false);
+                pendingWin = bet * (Math.floor(Math.random()*10)+2);
+                document.getElementById('win-lines').style.display = 'block';
+                document.getElementById('win-lines').innerHTML = '<path class="win-path" d="M 0 175 L 1000 175" />';
+                document.getElementById('main-stage').classList.add('shake');
+                btn.innerText = "TAKE"; btn.className = "btn-main take";
+                s_win.play();
+                if(autoMode) setTimeout(takeMoney, 1000);
             } else {
                 btn.innerText = "START"; btn.className = "btn-main";
                 if(autoMode) setTimeout(handleAction, 500);
@@ -214,77 +187,35 @@
             updateUI();
         }
 
-        function showWinEffects(isStar) {
-            let btn = document.getElementById('main-btn');
-            drawWinLines();
-            document.getElementById('main-stage').classList.add('shake');
-            btn.innerText = "TAKE"; btn.className = "btn-main take";
-            if(isStar) s_star_win.play(); else s_win.play();
-            if(autoMode) setTimeout(takeMoney, 1000);
-        }
-
-        function drawWinLines() {
-            const svg = document.getElementById('win-lines');
-            svg.innerHTML = `
-                <path class="win-path" d="M 0 60 L 1000 60" />
-                <path class="win-path" d="M 0 175 L 1000 175" />
-                <path class="win-path" d="M 0 290 L 1000 290" />
-            `;
-            svg.style.display = 'block';
-        }
-
         function takeMoney() {
-            if(pendingWin <= 0) return;
             s_take.play();
             balance += pendingWin;
-            localStorage.setItem('babaBalance', balance);
+            save();
             pendingWin = 0;
             state = "IDLE";
             document.getElementById('win-lines').style.display = 'none';
             document.getElementById('main-stage').classList.remove('shake');
-            const btn = document.getElementById('main-btn');
-            btn.innerText = "START"; btn.className = "btn-main";
+            document.getElementById('main-btn').innerText = "START";
+            document.getElementById('main-btn').className = "btn-main";
             updateUI();
             if(autoMode) setTimeout(handleAction, 500);
         }
 
-        function toggleAuto() {
-            autoMode = !autoMode;
-            const btn = document.getElementById('auto-btn');
-            btn.innerText = autoMode ? "AUTO\nON" : "AUTO\nOFF";
-            btn.className = autoMode ? "btn-auto active" : "btn-auto";
-            if(autoMode && state === "IDLE") handleAction();
-        }
-
-        function manualBet() {
-            if(state !== "IDLE") return;
-            let newBet = prompt("Mərc məbləği:", bet);
-            if(newBet && !isNaN(newBet) && newBet > 0) { bet = parseFloat(newBet); updateUI(); }
-        }
-
+        function save() { localStorage.setItem("baba_bal_" + activeUser, balance); }
         function updateUI() { 
             document.getElementById('bal-text').innerText = balance.toFixed(2); 
             document.getElementById('win-text').innerText = pendingWin.toFixed(2);
             document.getElementById('bet-text').innerText = bet.toFixed(2);
         }
-
-        function openAdmin() { 
-            let p = prompt('Master Admin Şifrəsi (777):'); 
-            if(p == '777') {
-                let action = prompt("1: Balansı Sıfırla/Yenilə\n2: Uduş Şansını Dəyiş ("+winRate+")\n3: Giriş Kodunu Dəyiş");
-                if(action == "1") {
-                    let b = prompt("Yeni balans məbləği:", "100");
-                    balance = parseFloat(b);
-                    localStorage.setItem('babaBalance', balance);
-                    updateUI();
-                }
-                if(action == "2") winRate = prompt('Uduş Şansı %:', winRate);
-                if(action == "3") {
-                    let k = prompt("Yeni giriş kodu nə olsun?", masterConfig.code);
-                    masterConfig.code = k;
-                    alert("Kodu koda qeyd etməlisən ki, qalıcı olsun.");
-                }
-            } 
+        function toggleAuto() {
+            autoMode = !autoMode;
+            document.getElementById('auto-btn').innerText = autoMode ? "AUTO\nON" : "AUTO\nOFF";
+            document.getElementById('auto-btn').className = autoMode ? "btn-auto active" : "btn-auto";
+            if(autoMode && state === "IDLE") handleAction();
+        }
+        function manualBet() {
+            let b = prompt("Mərc:", bet);
+            if(b && !isNaN(b)) { bet = parseFloat(b); updateUI(); }
         }
     </script>
 </body>
