@@ -3,46 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BABA KAZİNO | Premium Edition</title>
+    <title>BABA KAZİNO | GitHub Version</title>
     <style>
-        :root { --gold: #ffcc00; --neon: #39ff14; }
+        :root { --gold: #ffcc00; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
         body { background: #000; color: white; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-        /* Oyun Konteyneri */
-        #game-container { width: 100%; max-width: 600px; background: #000; border: 2px solid #222; padding: 10px; border-radius: 15px; position: relative; }
+        #game-container { width: 100%; max-width: 800px; background: #000; padding: 10px; border-radius: 15px; }
 
-        /* Slot Makaraları */
-        .reels-wrapper { display: flex; justify-content: space-between; gap: 5px; margin-bottom: 20px; position: relative; }
-        .reel-col { width: 19%; height: 300px; background: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-        .symbol { width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; font-size: 50px; flex-shrink: 0; }
+        /* Makaralar */
+        .reels-wrapper { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; position: relative; }
+        .reel-col { width: 18%; height: 360px; background: linear-gradient(180deg, #111, #222, #111); border: 1px solid #333; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
+        .symbol { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .symbol img { width: 90px; height: 90px; object-fit: contain; }
 
-        /* Uduş Xətləri (Ziqzaq) */
-        #line-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-
-        /* Məlumat Paneli */
-        .dash { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #0a0a0a; border-top: 1px solid #444; border-bottom: 1px solid #444; padding: 10px 0; margin-bottom: 20px; }
+        /* Panel */
+        .dash { display: grid; grid-template-columns: repeat(3, 1fr); background: #0a0a0a; border-top: 1px solid #444; border-bottom: 1px solid #444; padding: 15px 0; margin-bottom: 20px; }
         .info-item { text-align: center; border-right: 1px solid #222; }
         .info-item:last-child { border-right: none; }
-        .info-item span { display: block; font-size: 10px; color: #888; font-weight: bold; }
-        .info-item strong { display: block; font-size: 18px; color: var(--gold); }
-        .sub-text { font-size: 10px; color: #666; }
+        .info-item span { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .info-item strong { display: block; font-size: 22px; color: var(--gold); }
 
         /* Düymələr */
-        .controls { display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
-        .btn-auto { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--gold); background: transparent; color: var(--gold); font-weight: bold; font-size: 10px; cursor: pointer; }
-        .btn-start { width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(#39ff14, #1b5e20); color: white; border: 4px solid #fff; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
-        .btn-start.take { background: radial-gradient(#ffcc00, #b8860b); color: #000; animation: pulse 1s infinite; }
-        .btn-exit { background: #c0392b; color: white; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; font-size: 12px; cursor: pointer; }
-
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        .controls { display: flex; justify-content: space-around; align-items: center; }
+        .btn-start { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(#39ff14, #1b5e20); color: white; border: 5px solid #fff; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
+        .btn-side { background: #222; color: #fff; border: 1px solid #444; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div id="game-container">
         <div class="reels-wrapper">
-            <svg id="line-svg" viewBox="0 0 500 300"></svg>
             <div class="reel-col" id="r1"></div>
             <div class="reel-col" id="r2"></div>
             <div class="reel-col" id="r3"></div>
@@ -51,182 +42,53 @@
         </div>
 
         <div class="dash">
-            <div class="info-item">
-                <span>KREDİT</span>
-                <strong id="bal-val">13.00</strong>
-                <span class="sub-text">AZN</span>
-            </div>
-            <div class="info-item">
-                <span>UDULUB</span>
-                <strong id="win-val">0.00</strong>
-                <span class="sub-text">AZN</span>
-            </div>
-            <div class="info-item">
-                <span>BAHİS</span>
-                <strong id="bet-val">1.00</strong>
-                <span class="sub-text">AZN</span>
-            </div>
+            <div class="info-item"><span>Kredit</span><strong id="bal-text">170.00</strong></div>
+            <div class="info-item"><span>Udulub</span><strong id="win-text">0.00</strong></div>
+            <div class="info-item"><span>Bahis</span><strong id="bet-text">2.00</strong></div>
         </div>
 
         <div class="controls">
-            <button class="btn-auto" id="auto-btn" onclick="toggleAuto()">AVTO</button>
-            <button class="btn-start" id="main-btn" onclick="handleSpin()">START</button>
-            <button class="btn-exit" onclick="location.reload()">ÇIXIŞ</button>
+            <button class="btn-side">AVTO</button>
+            <button class="btn-start" onclick="spin()">START</button>
+            <button class="btn-side" style="background:#c0392b;">ÇIXIŞ</button>
         </div>
     </div>
 
     <script>
-        // Şəkillər əvəzinə Emoji (Həmişə açılması üçün)
-        const symbols = ['🍋', '🍉', '🍇', '⭐', '7️⃣', '🍒', '🍊'];
-        const paylines = [
-            [1, 1, 1, 1, 1], // Orta düz
-            [0, 0, 0, 0, 0], // Üst düz
-            [2, 2, 2, 2, 2], // Alt düz
-            [0, 1, 2, 1, 0], // Ziqzaq V
-            [2, 1, 0, 1, 2]  // Tərs Ziqzaq
+        // GitHub-dakı real fayl adlarını bura yazdım (image_436100.jpg-ə əsasən)
+        const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
+        
+        const symbols = [
+            baseUrl + "7.png.jpeg",
+            baseUrl + "gavali.png.jpeg",
+            baseUrl + "limon.png.jpeg",
+            baseUrl + "portagal.png.jpeg",
+            baseUrl + "qarpiz.png.jpeg",
+            baseUrl + "ulduz.png.jpeg",
+            baseUrl + "uzum.png.jpeg"
         ];
 
-        let balance = 13.00, bet = 1.00, currentWin = 0, state = "IDLE", autoMode = false;
-        let reelData = [[],[],[],[],[]];
-
-        // Makaraları ilk doldurmaq
-        function initReels() {
+        function fillReels() {
             for(let i=1; i<=5; i++) {
                 const reel = document.getElementById('r'+i);
                 reel.innerHTML = '';
-                reelData[i-1] = [];
                 for(let j=0; j<3; j++) {
-                    const sym = symbols[Math.floor(Math.random() * symbols.length)];
-                    reelData[i-1].push(sym);
-                    reel.innerHTML += `<div class="symbol">${sym}</div>`;
+                    const imgUrl = symbols[Math.floor(Math.random() * symbols.length)];
+                    reel.innerHTML += `<div class="symbol"><img src="${imgUrl}"></div>`;
                 }
             }
         }
-        initReels();
 
-        function handleSpin() {
-            if (state === "IDLE") {
-                if (balance < bet) return alert("Balans kifayət deyil!");
-                
-                state = "SPINNING";
-                balance -= bet;
-                currentWin = 0;
-                updateUI();
-                document.getElementById('line-svg').innerHTML = '';
-                document.getElementById('main-btn').innerText = "STOP";
-
-                startSpinAnimation();
-            } else if (state === "SPINNING") {
-                stopSpinAnimation();
-            } else if (state === "WINNING") {
-                collectWin();
-            }
+        function spin() {
+            let count = 0;
+            const timer = setInterval(() => {
+                fillReels();
+                count++;
+                if(count > 10) clearInterval(timer);
+            }, 100);
         }
 
-        let intervals = [];
-        function startSpinAnimation() {
-            for(let i=1; i<=5; i++) {
-                intervals[i] = setInterval(() => {
-                    const reel = document.getElementById('r'+i);
-                    const sym = symbols[Math.floor(Math.random() * symbols.length)];
-                    reel.innerHTML = `<div class="symbol">${sym}</div>` + reel.innerHTML;
-                    if (reel.children.length > 3) reel.removeChild(reel.lastChild);
-                }, 100);
-            }
-            // Avtomatik dayanma (sıra ilə)
-            for(let i=1; i<=5; i++) {
-                setTimeout(() => stopReel(i), 1000 + (i * 300));
-            }
-        }
-
-        function stopReel(i) {
-            if (!intervals[i]) return;
-            clearInterval(intervals[i]);
-            intervals[i] = null;
-
-            const reel = document.getElementById('r'+i);
-            reelData[i-1] = [];
-            Array.from(reel.children).forEach(child => reelData[i-1].push(child.innerText));
-
-            if (i === 5) checkResults();
-        }
-
-        function stopSpinAnimation() {
-            for(let i=1; i<=5; i++) stopReel(i);
-        }
-
-        function checkResults() {
-            let winAmount = 0;
-            let winningLines = [];
-
-            paylines.forEach((line, index) => {
-                let firstSym = reelData[0][line[0]];
-                let count = 1;
-
-                for(let col=1; col<5; col++) {
-                    if (reelData[col][line[col]] === firstSym) count++;
-                    else break;
-                }
-
-                if (count >= 3) {
-                    let multiplier = (firstSym === '7️⃣') ? 100 : (firstSym === '⭐' ? 2 : count * 2);
-                    winAmount += (bet * multiplier);
-                    winningLines.push(line);
-                }
-            });
-
-            if (winAmount > 0) {
-                currentWin = winAmount;
-                state = "WINNING";
-                document.getElementById('main-btn').innerText = "TAKE";
-                document.getElementById('main-btn').classList.add('take');
-                drawLines(winningLines);
-            } else {
-                state = "IDLE";
-                document.getElementById('main-btn').innerText = "START";
-                if (autoMode) setTimeout(handleSpin, 1000);
-            }
-            updateUI();
-        }
-
-        function drawLines(lines) {
-            const svg = document.getElementById('line-svg');
-            lines.forEach(line => {
-                let points = "";
-                line.forEach((row, col) => {
-                    points += `${(col * 100) + 50},${(row * 100) + 50} `;
-                });
-                const poly = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-                poly.setAttribute("points", pts = points);
-                poly.setAttribute("stroke", "yellow");
-                poly.setAttribute("stroke-width", "5");
-                poly.setAttribute("fill", "none");
-                svg.appendChild(poly);
-            });
-        }
-
-        function collectWin() {
-            balance += currentWin;
-            currentWin = 0;
-            state = "IDLE";
-            document.getElementById('main-btn').innerText = "START";
-            document.getElementById('main-btn').classList.remove('take');
-            document.getElementById('line-svg').innerHTML = '';
-            updateUI();
-            if (autoMode) setTimeout(handleSpin, 500);
-        }
-
-        function updateUI() {
-            document.getElementById('bal-val').innerText = balance.toFixed(2);
-            document.getElementById('win-val').innerText = currentWin.toFixed(2);
-        }
-
-        function toggleAuto() {
-            autoMode = !autoMode;
-            document.getElementById('auto-btn').style.background = autoMode ? "var(--neon)" : "transparent";
-            document.getElementById('auto-btn').style.color = autoMode ? "#000" : "var(--gold)";
-            if (autoMode && state === "IDLE") handleSpin();
-        }
+        window.onload = fillReels;
     </script>
 </body>
 </html>
