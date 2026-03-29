@@ -3,68 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BABA KAZİNO | Official Edition</title>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        // Sənin Firebase Məlumatların
-        const firebaseConfig = {
-            apiKey: "AIzaSyCIEUZQm-Vntf7gDSN_je6PEmnbdTIRNnw",
-            authDomain: "babacasino-bd0cc.firebaseapp.com",
-            projectId: "babacasino-bd0cc",
-            storageBucket: "babacasino-bd0cc.firebasestorage.app",
-            messagingSenderId: "166709591988",
-            appId: "1:166709591988:web:5c4004ed8a3e557a1d3ce1"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // --- MÜŞTƏRİ SİYAHISI (Buranı GitHub-da redaktə edə bilərsən) ---
-        // Format: "KOD": [BALANS, UDUŞ_FAİZİ]
-        const LOKAL_MUSTERILER = {
-            "145127": [100.00, 30], // %30 uduş şansı
-            "7777": [500.00, 70],   // %70 uduş şansı (Çox udacaq)
-            "admin": [1000.00, 90]  // %90 uduş şansı
-        };
-
-        // Oyunun qalan hissəsi üçün dəyişənlər
-        window.db = db;
-        window.LOKAL_MUSTERILER = LOKAL_MUSTERILER;
-    </script>
-
+    <title>BABA KAZİNO | Ultra Edition</title>
     <style>
         :root { --gold: #ffd700; --fire: #ff4500; }
-        body { background: #000; color: #fff; margin: 0; overflow: hidden; font-family: sans-serif; }
-        #login-screen { position: fixed; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .code-display { width: 260px; height: 60px; background: #111; border: 3px solid var(--gold); border-radius: 12px; font-size: 32px; color: var(--gold); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; box-shadow: 0 0 20px rgba(255,215,0,0.3); }
-        .numpad { display: grid; grid-template-columns: repeat(3, 80px); gap: 10px; }
-        .n-btn { width: 80px; height: 80px; background: #222; border: 1px solid #444; border-radius: 10px; color: #fff; font-size: 24px; }
+        body { background: #000; color: #fff; margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; }
         
-        #game-area { display: none; height: 100vh; flex-direction: column; background: radial-gradient(circle, #220000 0%, #000 100%); }
-        .reels { flex: 1; display: flex; justify-content: center; align-items: center; gap: 5px; padding: 5px; }
-        .reel { width: 19%; height: 80%; background: rgba(0,0,0,0.8); border: 2px solid #333; border-radius: 5px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; overflow: hidden; }
-        .sym { font-size: 45px; transition: 0.1s; filter: drop-shadow(0 0 10px rgba(255,69,0,0.5)); }
+        #game-area { display: flex; height: 100vh; flex-direction: column; background: radial-gradient(circle, #220000 0%, #000 100%); }
         
-        .panel { background: #111; padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid #333; }
-        .stat { text-align: center; }
-        .stat span { font-size: 10px; color: #aaa; display: block; }
-        .stat b { font-size: 20px; color: var(--gold); }
+        /* Slot Sistemi */
+        .reels { flex: 1; display: flex; justify-content: center; align-items: center; gap: 5px; padding: 10px; }
+        .reel { width: 18%; height: 70%; background: rgba(20,20,20,0.9); border: 2px solid #333; border-radius: 8px; display: flex; flex-direction: column; justify-content: space-around; align-items: center; overflow: hidden; box-shadow: inset 0 0 15px #000; }
         
-        .controls { padding: 15px; display: flex; justify-content: space-around; align-items: center; }
-        .btn-start { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(#2ecc71, #1b5e20); border: 4px solid #fff; color: #fff; font-weight: bold; font-size: 18px; box-shadow: 0 0 20px #2ecc71; }
-        .btn-avto { width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--gold); background: #000; color: var(--gold); font-size: 12px; }
-        .btn-exit { background: #c0392b; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; }
+        /* Yüklədiyin Professional Şəkillər */
+        .sym-img { width: 85%; height: auto; max-height: 80px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,215,0,0.3)); transition: 0.1s; }
+        
+        /* İnfo Paneli */
+        .panel { background: #0a0a0a; padding: 12px; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 2px solid #222; }
+        .stat { text-align: center; border-right: 1px solid #222; }
+        .stat:last-child { border-right: none; }
+        .stat span { font-size: 11px; color: #888; display: block; font-weight: bold; text-transform: uppercase; }
+        .stat b { font-size: 20px; color: var(--gold); letter-spacing: 1px; }
+        .azn-label { font-size: 10px; color: #555; display: block; margin-top: 2px; }
+        
+        /* Düymələr */
+        .controls { padding: 20px; display: flex; justify-content: space-around; align-items: center; background: #050505; }
+        .btn-start { width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(#2ecc71, #1b5e20); border: 4px solid #fff; color: #fff; font-weight: bold; font-size: 16px; box-shadow: 0 0 20px rgba(46,204,113,0.4); cursor: pointer; text-transform: uppercase; }
+        .btn-start:active { transform: scale(0.95); }
+        .btn-avto { width: 65px; height: 65px; border-radius: 50%; border: 2px solid var(--gold); background: transparent; color: var(--gold); font-size: 12px; font-weight: bold; cursor: pointer; }
+        .btn-exit { background: #550000; color: #aaa; border: 1px solid #333; padding: 8px 15px; border-radius: 4px; font-size: 11px; cursor: pointer; }
     </style>
 </head>
 <body>
-
-<div id="login-screen">
-    <h1 style="color:var(--gold)">BABA KAZİNO</h1>
-    <div class="code-display" id="code-val">****</div>
-    <div class="numpad" id="numpad"></div>
-</div>
 
 <div id="game-area">
     <div class="reels">
@@ -74,102 +43,98 @@
         <div class="reel" id="r4"></div>
         <div class="reel" id="r5"></div>
     </div>
+
     <div class="panel">
-        <div class="stat"><span>KREDİT</span><b id="bal-txt">0.00</b></div>
-        <div class="stat"><span>UDULUB</span><b id="win-txt">0.00</b></div>
-        <div class="stat"><span>BAHİS</span><b id="bet-txt">1.00</b></div>
+        <div class="stat"><span>KREDİT</span><b id="bal-txt">16400</b><span class="azn-label">164.00 Azn</span></div>
+        <div class="stat"><span>UDULUB</span><b id="win-txt">0</b><span class="azn-label">0.00 Azn</span></div>
+        <div class="stat"><span>BAHİS</span><b id="bet-txt">200</b><span class="azn-label">2.00 Azn</span></div>
     </div>
+
     <div class="controls">
-        <button class="btn-avto" onclick="toggleAuto()">AVTO</button>
+        <button class="btn-avto" id="avto-btn" onclick="toggleAuto()">AVTO</button>
         <button class="btn-start" id="main-btn" onclick="handlePlay()">START</button>
-        <button class="btn-exit" onclick="cixis()">ÇIXIŞ</button>
+        <button class="btn-exit" onclick="location.reload()">ÇIXIŞ</button>
     </div>
 </div>
 
 <script>
-    const symbols = ["🔥🍇", "⭐", "🍉", "🍋", "7️⃣", "🍒", "🍇"];
-    let curBal = 0;
+    // GitHub-a yüklədiyin şəkillərin tam adları
+    const symbolImages = [
+        "simvollar/IMG_2153.jpeg", // 7
+        "simvollar/IMG_2152.jpeg", // Üzüm
+        "simvollar/IMG_2151.jpeg", // Qarpız
+        "simvollar/IMG_2154.jpeg", // Ulduz
+        "simvollar/IMG_2155.jpeg", // Limon
+        "simvollar/IMG_2156.jpeg", // Portağal
+        "simvollar/IMG_2157.jpeg", // Gavalı
+        "simvollar/IMG_2149.jpeg"  // Albalı/Erik
+    ];
+    
+    let curBal = 164.00;
     let curWin = 0;
-    let curBet = 1.00;
-    let activeUser = null;
+    let curBet = 2.00;
     let isSpinning = false;
     let auto = false;
 
-    // Numpad yaratma
-    const pad = document.getElementById('numpad');
-    ['1','2','3','4','5','6','7','8','9','C','0','OK'].forEach(v => {
-        let b = document.createElement('button'); b.className = 'n-btn'; b.innerText = v;
-        b.onclick = () => {
-            let d = document.getElementById('code-val');
-            if(v==='C') d.innerText = '****';
-            else if(v==='OK') giris(d.innerText);
-            else { if(d.innerText==='****') d.innerText = v; else d.innerText += v; }
-        };
-        pad.appendChild(b);
-    });
-
-    function giris(kod) {
-        if(window.LOKAL_MUSTERILER[kod]) {
-            activeUser = kod;
-            curBal = window.LOKAL_MUSTERILER[kod][0];
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('game-area').style.display = 'flex';
-            updateUI();
-            fillAll();
-        } else { alert("Yanlış kod!"); document.getElementById('code-val').innerText = '****'; }
-    }
-
-    function fillAll() { for(let i=1;i<=5;i++) fillReel(i); }
-    function fillReel(id) {
-        let r = document.getElementById('r'+id);
-        r.innerHTML = '';
-        for(let j=0;j<3;j++) {
-            let s = document.createElement('div'); s.className = 'sym';
-            s.innerText = symbols[Math.floor(Math.random()*symbols.length)];
-            r.appendChild(s);
+    // Başlanğıcda slotları doldur
+    function init() {
+        for(let i=1; i<=5; i++) {
+            const r = document.getElementById('r'+i);
+            r.innerHTML = '';
+            for(let j=0; j<3; j++) {
+                const img = document.createElement('img');
+                img.className = 'sym-img';
+                img.src = symbolImages[Math.floor(Math.random() * symbolImages.length)];
+                r.appendChild(img);
+            }
         }
     }
 
     function handlePlay() {
-        if(isSpinning) return;
-        if(curBal < curBet) { alert("Balans azdır!"); return; }
+        if(isSpinning || curBal < curBet) return;
         
         isSpinning = true;
         curBal -= curBet;
         curWin = 0;
         updateUI();
         
-        let count = 0;
-        let iv = setInterval(() => { fillAll(); count++; if(count > 15) stop(iv); }, 50);
+        let spinCount = 0;
+        const interval = setInterval(() => {
+            init();
+            spinCount++;
+            if(spinCount > 12) {
+                clearInterval(interval);
+                finishSpin();
+            }
+        }, 80);
     }
 
-    function stop(iv) {
-        clearInterval(iv);
+    function finishSpin() {
         isSpinning = false;
-        
-        // Uduş şansını yoxla
-        let sans = window.LOKAL_MUSTERILER[activeUser][1];
-        if(Math.random()*100 < sans) {
-            curWin = curBet * (Math.floor(Math.random()*10)+2);
+        // Təsadüfi uduş simulyasiyası
+        if(Math.random() < 0.3) {
+            curWin = curBet * 5;
             curBal += curWin;
-            document.getElementById('main-btn').style.boxShadow = "0 0 40px gold";
-        } else {
-            document.getElementById('main-btn').style.boxShadow = "none";
         }
         updateUI();
         if(auto) setTimeout(handlePlay, 1000);
     }
 
     function updateUI() {
-        document.getElementById('bal-txt').innerText = curBal.toFixed(2);
-        document.getElementById('win-txt').innerText = curWin.toFixed(2);
+        document.getElementById('bal-txt').innerText = (curBal * 100).toFixed(0);
+        document.querySelector('#bal-txt + .azn-label').innerText = curBal.toFixed(2) + " Azn";
+        document.getElementById('win-txt').innerText = (curWin * 100).toFixed(0);
+        document.querySelector('#win-txt + .azn-label').innerText = curWin.toFixed(2) + " Azn";
     }
 
-    function cixis() {
-        if(confirm("Çıxmaq istəyirsən?")) location.reload();
+    function toggleAuto() {
+        auto = !auto;
+        document.getElementById('avto-btn').style.background = auto ? "var(--gold)" : "transparent";
+        document.getElementById('avto-btn').style.color = auto ? "#000" : "var(--gold)";
+        if(auto) handlePlay();
     }
-    
-    function toggleAuto() { auto = !auto; document.querySelector('.btn-avto').style.background = auto ? "var(--gold)" : "#000"; if(auto) handlePlay(); }
+
+    init();
 </script>
 </body>
 </html>
