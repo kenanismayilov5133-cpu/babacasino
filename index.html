@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BABA KAZİNO | Multi-User Edition</title>
+    <title>BABA KAZİNO | Official Edition</title>
     <style>
         :root { --gold: #d4af37; --red: #ff0000; --neon: #00f3ff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
@@ -81,7 +81,7 @@
         const s_star_win = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         const s_take = new Audio('https://actions.google.com/sounds/v1/cartoon/clink_clank.ogg');
 
-        // İSTİFADƏÇİ SİSTEMİ
+        // QALICI SİSTEM: Məlumatları brauzerin yaddaşında saxlayır (Local Storage)
         let users = JSON.parse(localStorage.getItem('babaUsers')) || { "777": 100.00 };
         let currentUser = null;
         let balance = 0;
@@ -107,6 +107,7 @@
 
         function login() { 
             let code = document.getElementById('display').innerText;
+            // Əgər kod sistemdə varsa və ya əvvəlcədən daxil olubsa
             if(users[code] !== undefined) { 
                 currentUser = code;
                 balance = users[code];
@@ -114,7 +115,7 @@
                 document.getElementById('game-area').style.display='flex'; 
                 init(); 
             } else {
-                alert("Kod yanlışdır və ya aktiv deyil!");
+                alert("Kod yanlışdır! Admin panelindən kodu və balansı təyin edin.");
                 document.getElementById('display').innerText = "****";
             }
         }
@@ -187,7 +188,7 @@
 
             if(isSevenWin) {
                 state = "WINNING";
-                pendingWin = bet * 100; // 100 QAT!
+                pendingWin = bet * 100;
                 for(let i=1; i<=4; i++) {
                     document.getElementById('r'+i).innerHTML = `<div class="symbol">7️⃣</div><div class="symbol">7️⃣</div><div class="symbol">7️⃣</div>`;
                 }
@@ -274,31 +275,31 @@
         function openAdmin() { 
             let p = prompt('Master Admin Şifrəsi:'); 
             if(p == '777') {
-                let action = prompt("1: Yeni İstifadəçi/Kod Əlavə Et\n2: İstifadəçini Sil\n3: Bütün İstifadəçiləri Gör\n4: Uduş Şansı Değiş");
+                let action = prompt("1: Yeni Kod və Balans Əlavə Et\n2: Kodu Sil\n3: Bütün Aktiv Kodları Gör\n4: Uduş Şansını Düzəlt");
                 
                 if(action == "1") {
-                    let newUser = prompt("Yeni giriş kodu təyin et:");
-                    let newBal = prompt("Başlanğıc balansı yaz:", "50");
+                    let newUser = prompt("Müştəri üçün giriş kodu təyin et:");
+                    let newBal = prompt("Müştərinin balansı nə qədər olsun?", "100");
                     if(newUser && newBal) {
                         users[newUser] = parseFloat(newBal);
-                        saveData();
-                        alert(newUser + " kodu uğurla əlavə edildi!");
+                        localStorage.setItem('babaUsers', JSON.stringify(users));
+                        alert("Uğurla əlavə edildi! İndi linki və " + newUser + " kodunu müştəriyə göndərə bilərsən.");
                     }
                 }
                 if(action == "2") {
                     let delUser = prompt("Silmək istədiyiniz kodu yazın:");
                     if(users[delUser]) {
                         delete users[delUser];
-                        saveData();
-                        alert("İstifadəçi silindi!");
+                        localStorage.setItem('babaUsers', JSON.stringify(users));
+                        alert("Kod və balans sistemdən silindi!");
                     }
                 }
                 if(action == "3") {
-                    let list = "Mövcud Kodlar:\n";
-                    for(let u in users) list += "Kod: " + u + " | Balans: " + users[u] + "\n";
+                    let list = "Sistemdəki Kodlar:\n";
+                    for(let u in users) list += "Kod: " + u + " | Balans: " + users[u] + " AZN\n";
                     alert(list);
                 }
-                if(action == "4") winRate = prompt('Uduş Şansı %:', winRate);
+                if(action == "4") winRate = prompt('Uduş Şansı (1-100):', winRate);
             } 
         }
     </script>
