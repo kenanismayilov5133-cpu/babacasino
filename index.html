@@ -2,134 +2,218 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BABA KAZİNO | 4 rəqəmli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>BABA KAZİNO | Pro Edition</title>
     <style>
-        :root { --gold: #ffd700; --dark: #111; }
-        body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 2000; }
-        .keypad { background: #222; padding: 20px; border-radius: 15px; border: 2px solid var(--gold); text-align: center; }
-        .screen { background: #000; color: var(--gold); font-size: 35px; height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; border-radius: 8px; border: 1px solid #444; min-width: 180px; letter-spacing: 10px; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .btn { background: #333; color: white; border: none; padding: 20px; font-size: 22px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn:active { background: var(--gold); color: black; }
+        :root { --gold: #ffcc00; --neon: #39ff14; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background: #000; color: white; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-        #game-container { display: none; text-align: center; width: 100%; }
-        .balans-area { background: #222; padding: 10px; border-bottom: 2px solid var(--gold); font-size: 22px; color: var(--gold); margin-bottom: 20px; }
-        .slot-box { font-size: 45px; background: #000; padding: 30px; border: 3px solid var(--gold); border-radius: 15px; margin: 20px auto; width: fit-content; box-shadow: 0 0 20px rgba(255,215,0,0.2); }
-        .main-btn { background: var(--gold); color: black; padding: 18px 50px; font-size: 24px; font-weight: bold; border-radius: 12px; border: none; cursor: pointer; text-transform: uppercase; }
-        .main-btn:active { transform: scale(0.95); }
+        /* GİRİŞ */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .keypad-container { width: 320px; background: #222; border: 4px solid #444; border-radius: 15px; padding: 20px; text-align: center; }
+        .access-screen { background: #001a00; border: 2px solid #004400; height: 50px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #0f0; letter-spacing: 5px; border-radius: 5px; }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .key-btn { background: #333; border: 1px solid #555; border-radius: 8px; height: 60px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; }
+        .key-ok { background: #004400; color: #0f0; border-color: #0f0; }
+
+        /* OYUN */
+        #game-container { display: none; width: 100%; max-width: 950px; background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); padding: 15px; border: 3px solid #333; border-radius: 15px; position: relative; }
+        .reels-wrapper { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 10px; }
+        .reel-col { width: 19%; height: 380px; background: #0a0a0a; border: 1px solid #444; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+        .symbol { width: 100%; height: 126px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .symbol img { width: 90px; height: 90px; object-fit: contain; }
+
+        .dash { display: flex; justify-content: space-around; background: linear-gradient(90deg, #111, #222, #111); border: 2px solid #444; padding: 10px; margin-bottom: 20px; border-radius: 10px; }
+        .info-item { text-align: center; min-width: 120px; }
+        .info-item span { display: block; font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; }
+        .info-item strong { display: block; font-size: 18px; color: var(--gold); }
+
+        .control-panel { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .btn-rect { background: linear-gradient(180deg, #444, #111); border: 2px solid #666; color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .avto-btn { width: 85px; height: 85px; border-radius: 50%; background: radial-gradient(#222, #000); border: 4px solid var(--gold); color: white; cursor: pointer; font-size: 14px; }
+        .avto-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 15px var(--neon); }
+        .start-btn { width: 130px; height: 130px; border-radius: 50%; background: #fff; color: #000; font-size: 24px; font-weight: 900; border: 8px solid #2e7d32; cursor: pointer; }
+
+        .picker-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .picker-box { background: #222; padding: 20px; border: 2px solid var(--gold); border-radius: 15px; width: 90%; max-width: 500px; text-align: center; }
+        .picker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
+        .picker-item { background: #444; color: white; padding: 12px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        .win-glow { filter: brightness(1.5) drop-shadow(0 0 15px yellow) !important; transform: scale(1.1); }
+        .win-line { position: absolute; height: 6px; background: yellow; box-shadow: 0 0 15px yellow; z-index: 10; pointer-events: none; }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
-        <h2 style="color:var(--gold); letter-spacing: 2px;">GİRİŞ KODU</h2>
-        <div class="keypad">
-            <div id="display" class="screen">----</div>
-            <div class="grid">
-                <button class="btn" onclick="tap(1)">1</button>
-                <button class="btn" onclick="tap(2)">2</button>
-                <button class="btn" onclick="tap(3)">3</button>
-                <button class="btn" onclick="tap(4)">4</button>
-                <button class="btn" onclick="tap(5)">5</button>
-                <button class="btn" onclick="tap(6)">6</button>
-                <button class="btn" onclick="tap(7)">7</button>
-                <button class="btn" onclick="tap(8)">8</button>
-                <button class="btn" onclick="tap(9)">9</button>
-                <button class="btn" style="background:#800" onclick="clr()">C</button>
-                <button class="btn" onclick="tap(0)">0</button>
-                <button class="btn" style="background:#080" onclick="go()">OK</button>
+        <h2 style="margin-bottom: 15px; color: #888;">GİRİŞ</h2>
+        <div class="keypad-container">
+            <div class="access-screen" id="code-display">****</div>
+            <div class="keypad-grid">
+                <button class="key-btn" onclick="pressKey('1')">1</button><button class="key-btn" onclick="pressKey('2')">2</button><button class="key-btn" onclick="pressKey('3')">3</button>
+                <button class="key-btn" onclick="pressKey('4')">4</button><button class="key-btn" onclick="pressKey('5')">5</button><button class="key-btn" onclick="pressKey('6')">6</button>
+                <button class="key-btn" onclick="pressKey('7')">7</button><button class="key-btn" onclick="pressKey('8')">8</button><button class="key-btn" onclick="pressKey('9')">9</button>
+                <button class="key-btn" onclick="resetKeypad()">C</button><button class="key-btn" onclick="pressKey('0')">0</button><button class="key-btn key-ok" onclick="checkCode()">OK</button>
             </div>
         </div>
     </div>
 
+    <div id="picker-modal" class="picker-overlay" onclick="closePicker()">
+        <div class="picker-box" onclick="event.stopPropagation()">
+            <h3 id="picker-title" style="color:var(--gold)">SEÇİN</h3>
+            <div class="picker-grid" id="picker-content"></div>
+        </div>
+    </div>
+
     <div id="game-container">
-        <div class="balans-area">BALANS: <span id="bal-text">0.00</span> AZN</div>
-        <div class="slot-box" id="slot-res">🎰 🎰 🎰</div>
-        <p id="msg" style="color: #aaa; font-style: italic;">Mərc: 1.00 AZN</p>
-        <button class="main-btn" onclick="spin()">SPIN</button>
+        <div id="line-layer"></div>
+        <div class="reels-wrapper" id="reels-area">
+            <div class="reel-col" id="r1"></div><div class="reel-col" id="r2"></div><div class="reel-col" id="r3"></div><div class="reel-col" id="r4"></div><div class="reel-col" id="r5"></div>
+        </div>
+
+        <div class="dash">
+            <div class="info-item"><span>BALANS</span><strong id="bal-val">0.00 AZN</strong></div>
+            <div class="info-item"><span>UDUŞ</span><strong id="win-val" style="color:var(--neon)">0.00 AZN</strong></div>
+            <div class="info-item"><span>MƏRC</span><strong id="bet-total-val">0.00 AZN</strong></div>
+        </div>
+
+        <div class="control-panel">
+            <button class="btn-rect" style="width:80px;">RİSK</button>
+            <button class="avto-btn" id="auto-btn" onclick="toggleAuto()">AVTO</button>
+            <button class="start-btn" id="main-btn" onclick="handleMainAction()">START</button>
+            <div style="display:flex; gap:8px;">
+                <div class="btn-rect" onclick="openPicker('line')" style="width:75px; text-align:center;">XƏTT<br><b id="line-display">20</b></div>
+                <div class="btn-rect" onclick="openPicker('bet')" style="width:75px; text-align:center;">BAHİS<br><b id="bet-display">1.00</b></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // HƏM BALANS, HƏM UDUŞ FAİZİ (WinPercent)
-        const users = {
-            "1765": { bal: 50.00, winPercent: 30 }, // 30% şans
-            "6547": { bal: 10.00, winPercent: 15 }, // 15% şans
-            "9643": { bal: 15.00, winPercent: 20 }, // 20% şans
-            "1587": { bal: 25.00, winPercent: 80 }  // TEST ÜÇÜN: 80% şans (həmişə udur)
+        // İSTİFADƏÇİ MƏLUMATLARI VƏ FAİZLƏR
+        const users = { 
+            "1111": { bal: 5000.00, winPercent: 85 },
+            "1765": { bal: 50.00, winPercent: 30 },
+            "6547": { bal: 10.00, winPercent: 15 },
+            "1587": { bal: 25.00, winPercent: 80 }
         };
 
-        let currentCode = "";
-        let balance = 0;
-        let myWinChance = 0;
+        let balans = 0, activeLine = 20, activeBet = 1.00, currentWin = 0, inputCode = "", autoMode = false, gameState = "START", myWinPercent = 35;
+        const betSteps = [0.10, 0.20, 0.30, 0.40, 0.50, 1.00, 2.00, 5.00, 10.00, 30.00, 50.00, 100.00, 150.00, 200.00];
 
-        function tap(n) {
-            if(currentCode.length < 4) {
-                currentCode += n;
-                updateDisplay();
+        function getBetAmount() { return (activeLine / 20) * activeBet; }
+
+        function updateUI(win = 0) {
+            document.getElementById('bal-val').innerText = balans.toFixed(2) + " AZN";
+            document.getElementById('win-val').innerText = win.toFixed(2) + " AZN";
+            document.getElementById('bet-total-val').innerText = getBetAmount().toFixed(2) + " AZN";
+            document.getElementById('line-display').innerText = activeLine;
+            document.getElementById('bet-display').innerText = activeBet.toFixed(2);
+            // BALANSI YADDAŞA YAZMAQ
+            if(inputCode) localStorage.setItem('baba_pro_bal_' + inputCode, balans);
+        }
+
+        function openPicker(type) {
+            const content = document.getElementById('picker-content');
+            content.innerHTML = '';
+            if(type === 'line') {
+                for(let i=1; i<=20; i++) content.innerHTML += `<div class="picker-item" onclick="setPicker('line', ${i})">${i} XƏTT</div>`;
+            } else {
+                betSteps.forEach(v => {
+                    content.innerHTML += `<div class="picker-item" onclick="setPicker('bet', ${v})">${v.toFixed(2)}</div>`;
+                });
             }
+            document.getElementById('picker-modal').style.display = 'flex';
         }
 
-        function updateDisplay() {
-            let res = "";
-            for(let i=0; i<4; i++) {
-                res += (i < currentCode.length) ? "*" : "-";
-            }
-            document.getElementById('display').innerText = res;
-        }
-
-        function clr() {
-            currentCode = "";
-            updateDisplay();
-        }
-
-        function go() {
-            if(users[currentCode]) {
-                // LocalStorage-dan yoxla
-                let saved = localStorage.getItem('bal_v4_' + currentCode);
-                balance = saved ? parseFloat(saved) : users[currentCode].bal;
-                myWinChance = users[currentCode].winPercent; // Şansı bazadan götürürük
+        function setPicker(type, val) { if(type === 'line') activeLine = val; else activeBet = val; updateUI(); closePicker(); }
+        function closePicker() { document.getElementById('picker-modal').style.display = 'none'; }
+        
+        function pressKey(num) { if(inputCode.length < 4) { inputCode += num; document.getElementById('code-display').innerText = "*".repeat(inputCode.length); } }
+        function resetKeypad() { inputCode = ""; document.getElementById('code-display').innerText = "****"; }
+        
+        function checkCode() {
+            if(users[inputCode]) {
+                // YADDAŞDAN BALANS OXUMA
+                let saved = localStorage.getItem('baba_pro_bal_' + inputCode);
+                balans = saved ? parseFloat(saved) : users[inputCode].bal;
+                myWinPercent = users[inputCode].winPercent;
                 
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
-                refreshUI();
-            } else {
-                alert("KOD SƏHVDİR!");
-                clr();
+                updateUI(); fillInitialReels();
+            } else resetKeypad();
+        }
+
+        const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
+        const items = ["7.png.jpeg", "gavali.png.jpeg", "limon.png.jpeg", "portagal.png.jpeg", "qarpiz.png.jpeg", "ulduz.png.jpeg", "uzum.png.jpeg"];
+        let reelIntervals = [null, null, null, null, null], stopTimeouts = [];
+
+        function fillInitialReels() { for(let i=0; i<5; i++) fillSingleReel(i); }
+        function fillSingleReel(i, sym = null, count = 0) {
+            const r = document.getElementById('r'+(i+1)); r.innerHTML = '';
+            for(let j=0; j<3; j++) {
+                const img = (j === 1 && i < count) ? sym : items[Math.floor(Math.random() * items.length)];
+                r.innerHTML += `<div class="symbol" data-img="${img}" id="s-${i}-${j}"><img src="${baseUrl + img}"></div>`;
             }
         }
 
-        function refreshUI() {
-            document.getElementById('bal-text').innerText = balance.toFixed(2);
-            localStorage.setItem('bal_v4_' + currentCode, balance);
+        function handleMainAction() {
+            if (gameState === "START") startSpin();
+            else if (gameState === "STOP") immediateStop();
+            else if (gameState === "TAKE") takeWin();
         }
 
-        function spin() {
-            if(balance < 1) { alert("BALANS BİTDİ!"); return; }
-            balance -= 1;
-            refreshUI();
-            
-            document.getElementById('slot-res').innerText = "⏳ ⏳ ⏳";
-            
-            setTimeout(() => {
-                // UDUŞ FAİZİ BURADA İŞLƏYİR
-                let randomVal = Math.random() * 100;
-                if(randomVal < myWinChance) {
-                    let winAmt = 5; // Məsələn, 5 qat uduş
-                    balance += winAmt;
-                    document.getElementById('slot-res').innerText = "💰 💎 💰";
-                    document.getElementById('msg').innerText = "TƏBRİKLƏR! +5.00 AZN";
-                } else {
-                    document.getElementById('slot-res').innerText = "🍋 🍒 🔔";
-                    document.getElementById('msg').innerText = "TƏZADƏN YOXLA!";
-                }
-                refreshUI();
-            }, 700);
+        function startSpin() {
+            let bet = getBetAmount();
+            if (balans < bet) { autoMode = false; alert("Balans çatmır!"); return; }
+            clearWinEffects(); balans -= bet; updateUI(0);
+            gameState = "STOP"; updateBtn("STOP", "state-stop");
+
+            // SƏNİN FAİZ MƏNTİQİN
+            let isWin = (Math.random() * 100) < myWinPercent;
+            let winSym = isWin ? items[Math.floor(Math.random() * items.length)] : null;
+            let count = isWin ? (Math.random() > 0.8 ? 4 : 3) : 0;
+
+            for(let i=0; i<5; i++) reelIntervals[i] = setInterval(() => fillSingleReel(i, winSym, count), 80);
+            for(let i=0; i<5; i++) {
+                stopTimeouts.push(setTimeout(() => {
+                    if (reelIntervals[i]) { clearInterval(reelIntervals[i]); reelIntervals[i] = null; if (i === 4) checkPayout(); }
+                }, 800 + (i * 300)));
+            }
         }
-        
-        updateDisplay();
+
+        function immediateStop() {
+            stopTimeouts.forEach(t => clearTimeout(t));
+            reelIntervals.forEach((int, i) => { if (int) { clearInterval(int); reelIntervals[i] = null; } });
+            checkPayout();
+        }
+
+        function checkPayout() {
+            let win = 0, found = false, bet = getBetAmount();
+            for (let row = 0; row < 3; row++) {
+                let s0 = document.getElementById(`s-0-${row}`).dataset.img, s1 = document.getElementById(`s-1-${row}`).dataset.img, s2 = document.getElementById(`s-2-${row}`).dataset.img, s3 = document.getElementById(`s-3-${row}`).dataset.img;
+                if (s0 === s1 && s1 === s2 && s2 === s3) {
+                    found = true; win += bet * 10; drawWinLine(row, 4);
+                    for(let c=0; c<4; c++) document.querySelector(`#s-${c}-${row} img`).classList.add('win-glow');
+                } else if (s0 === s1 && s1 === s2) {
+                    found = true; win += bet * 3; drawWinLine(row, 3);
+                    for(let c=0; c<3; c++) document.querySelector(`#s-${c}-${row} img`).classList.add('win-glow');
+                }
+            }
+            if (found) { currentWin = win; updateUI(win); gameState = "TAKE"; updateBtn("TAKE", "state-take"); }
+            else { gameState = "START"; updateBtn("START", ""); if(autoMode) setTimeout(startSpin, 800); }
+        }
+
+        function takeWin() { balans += currentWin; currentWin = 0; updateUI(0); gameState = "START"; updateBtn("START", ""); clearWinEffects(); if(autoMode) setTimeout(startSpin, 400); }
+        function drawWinLine(row, count) {
+            const l = document.createElement('div'); l.className = 'win-line';
+            l.style.top = (70 + (row * 126)) + 'px'; l.style.left = '5%'; l.style.width = (count === 4 ? '75%' : '55%');
+            document.getElementById('line-layer').appendChild(l);
+        }
+        function clearWinEffects() { document.getElementById('line-layer').innerHTML = ''; document.querySelectorAll('.symbol img').forEach(img => img.classList.remove('win-glow')); }
+        function updateBtn(txt, cls) { const b = document.getElementById('main-btn'); b.innerText = txt; b.className = "start-btn " + (cls || ""); }
+        function toggleAuto() { autoMode = !autoMode; document.getElementById('auto-btn').classList.toggle('active'); if(autoMode && gameState === "START") startSpin(); }
     </script>
 </body>
 </html>
