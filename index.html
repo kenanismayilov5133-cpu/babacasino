@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -21,35 +20,39 @@
         .reels-container { flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 10px; background: #050505; position: relative; }
         .reel-col { width: 18%; height: 360px; background: #111; border: 1px solid #333; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
         .symbol { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; }
-        .symbol img { width: 80px; height: 80px; object-fit: contain; }
+        .symbol img { width: 85px; height: 85px; object-fit: contain; }
 
-        /* Uduş Xətləri (Ziqzaq) */
         .line-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 
-        .dash { background: #0a0a0a; display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; border-top: 2px solid var(--gold); }
-        .info-box { text-align: center; }
-        .info-box span { display: block; font-size: 10px; color: #888; }
+        .dash { background: #0a0a0a; display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; border-top: 2px solid var(--gold); gap: 10px; }
+        .info-box { text-align: center; border: 1px solid #222; padding: 5px; border-radius: 5px; }
+        .info-box span { display: block; font-size: 10px; color: #888; text-transform: uppercase; }
         .info-box strong { font-size: 18px; color: var(--gold); }
 
+        .bet-controls { display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .bet-btn { width: 30px; height: 30px; background: #333; border: 1px solid var(--gold); color: white; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
         .controls { background: #000; padding: 15px; display: flex; justify-content: space-around; align-items: center; }
-        .btn-main { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; font-weight: bold; cursor: pointer; }
+        .btn-main { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; font-weight: bold; cursor: pointer; font-size: 14px; }
         .btn-main.start { background: radial-gradient(#2ecc71, #1b5e20); color: white; }
         .btn-main.stop { background: radial-gradient(#e74c3c, #962d22); color: white; }
-        .btn-main.take { background: radial-gradient(#f1c40f, #f39c12); color: black; box-shadow: 0 0 20px var(--gold); }
-        .btn-auto { width: 60px; height: 60px; border-radius: 10px; background: #222; color: #fff; font-size: 10px; border: 1px solid #444; }
+        .btn-main.take { background: radial-gradient(#f1c40f, #f39c12); color: black; box-shadow: 0 0 20px var(--gold); animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+        .btn-side { width: 60px; height: 60px; border-radius: 10px; background: #222; color: #fff; font-size: 10px; border: 1px solid #444; }
     </style>
 </head>
 <body onclick="unlockAudio()">
 
     <div id="login-screen">
-        <h2 style="color:var(--gold); margin-bottom:15px;">BABA KAZİNO</h2>
+        <h2 style="color:var(--gold); margin-bottom:15px; letter-spacing: 2px;">BABA KAZİNO</h2>
         <div class="code-screen" id="display">****</div>
         <div class="numpad" id="pad"></div>
     </div>
 
     <div id="game-area">
         <div class="reels-container">
-            <svg class="line-overlay" id="win-lines"></svg>
+            <svg class="line-overlay" id="win-lines" viewBox="0 0 500 360"></svg>
             <div class="reel-col" id="r1"></div>
             <div class="reel-col" id="r2"></div>
             <div class="reel-col" id="r3"></div>
@@ -58,15 +61,22 @@
         </div>
 
         <div class="dash">
-            <div class="info-box"><span>BALANS (AZN)</span><strong id="bal-text">0.00</strong></div>
-            <div class="info-box"><span>SON UDUŞ</span><strong id="win-text">0.00</strong></div>
-            <div class="info-box"><span>MƏRC</span><strong id="bet-text">1.00</strong></div>
+            <div class="info-box"><span>BALANS</span><strong id="bal-text">0.00</strong></div>
+            <div class="info-box"><span>UDUŞ</span><strong id="win-text">0.00</strong></div>
+            <div class="info-box">
+                <span>MƏRC</span>
+                <div class="bet-controls">
+                    <button class="bet-btn" onclick="changeBet(-1)">-</button>
+                    <strong id="bet-text">1.00</strong>
+                    <button class="bet-btn" onclick="changeBet(1)">+</button>
+                </div>
+            </div>
         </div>
 
         <div class="controls">
-            <button id="auto-btn" class="btn-auto" onclick="toggleAuto()">AUTO<br>OFF</button>
+            <button id="auto-btn" class="btn-side" onclick="toggleAuto()">AUTO<br>OFF</button>
             <button id="main-btn" class="btn-main start" onclick="handleAction()">START</button>
-            <button class="num-btn" style="width:60px; height:60px; font-size:10px; background:#c0392b" onclick="tamCixis()">ÇIXIŞ</button>
+            <button class="btn-side" style="background:#400; color:white" onclick="tamCixis()">ÇIXIŞ</button>
         </div>
     </div>
 
@@ -77,22 +87,21 @@
             {id: 'lemon', img: 'https://img.icons8.com/emoji/96/lemon-emoji.png'},
             {id: 'grape', img: 'https://img.icons8.com/emoji/96/grapes-emoji.png'},
             {id: 'melon', img: 'https://img.icons8.com/emoji/96/watermelon-emoji.png'},
-            {id: 'star',  img: 'https://img.icons8.com/color/96/star--v1.png'},
+            {id: 'star',  img: 'https://img.icons8.com/emoji/96/star-emoji.png'},
             {id: 'seven', img: 'https://img.icons8.com/color/96/7-ball.png'}
         ];
 
-        // Uduş xətləri (0=üst, 1=orta, 2=alt)
         const paylines = [
             [1, 1, 1, 1, 1], // Orta düz
             [0, 0, 0, 0, 0], // Üst düz
             [2, 2, 2, 2, 2], // Alt düz
-            [0, 1, 2, 1, 0], // Ziqzaq (V)
-            [2, 1, 0, 1, 2]  // Tərs Ziqzaq
+            [0, 1, 2, 1, 0], // V-ziqzaq
+            [2, 1, 0, 1, 2]  // Tərs V-ziqzaq
         ];
 
         let balance = 0, bet = 1.00, pendingWin = 0, state = "IDLE", autoMode = false;
         let activeUserCode = localStorage.getItem("active_baba_user") || "";
-        let reelData = [[],[],[],[],[]]; // Ekrandakı meyvələrin datası
+        let reelData = [[],[],[],[],[]]; 
 
         // --- Giriş Məntiqi ---
         const padItems = ['1','2','3','4','5','6','7','8','9','C','0','OK'];
@@ -117,7 +126,10 @@
             } else { alert("Kod yanlış!"); document.getElementById('display').innerText='****'; }
         }
 
-        if(activeUserCode && MUSTERILER[activeUserCode]) startApp();
+        if(activeUserCode && MUSTERILER[activeUserCode]) {
+            balance = parseFloat(localStorage.getItem("baba_bal_"+activeUserCode)) || MUSTERILER[activeUserCode];
+            window.onload = startApp;
+        }
 
         function startApp() {
             document.getElementById('login-screen').style.display='none';
@@ -138,12 +150,22 @@
             r.innerHTML = content;
         }
 
+        function changeBet(val) {
+            if(state !== "IDLE") return;
+            const bets = [1, 2, 5, 10, 20, 50, 100];
+            let idx = bets.indexOf(bet);
+            if(val > 0 && idx < bets.length-1) bet = bets[idx+1];
+            if(val < 0 && idx > 0) bet = bets[idx-1];
+            updateUI();
+        }
+
         function handleAction() {
             if(state === "IDLE") {
-                if(balance < bet) return alert("Balans azdır!");
+                if(balance < bet) return alert("Balans kifayət deyil!");
                 clearLines();
                 state = "SPINNING";
                 balance -= bet;
+                save();
                 updateUI();
                 document.getElementById('main-btn').className = "btn-main stop";
                 document.getElementById('main-btn').innerText = "STOP";
@@ -160,7 +182,6 @@
             for(let i=1; i<=5; i++) {
                 spinIntervals[i] = setInterval(() => fillReel(i), 80);
             }
-            // Avtomatik dayanma (sıra ilə)
             for(let i=1; i<=5; i++) {
                 setTimeout(() => { if(spinIntervals[i]) stopReel(i); }, 1000 + (i*300));
             }
@@ -180,7 +201,7 @@
             let totalWin = 0;
             let linesWon = [];
 
-            paylines.forEach((line, lineIdx) => {
+            paylines.forEach((line) => {
                 let firstSym = reelData[0][line[0]];
                 let count = 1;
 
@@ -191,10 +212,13 @@
 
                 if(count >= 3) {
                     let winMult = 0;
-                    if(firstSym === 'seven') winMult = 100; // 3+ dənə 7 gəlsə x100
-                    else if(firstSym === 'star' && count === 3) winMult = 2; // 3 dənə ulduz x2
-                    else winMult = count * 2; // Qalan meyvələr (3 dənə x6, 4 dənə x8 və s.)
-
+                    if(firstSym === 'seven') {
+                        winMult = (count >= 4) ? 100 : 50; 
+                    } else if(firstSym === 'star') {
+                        winMult = 2; 
+                    } else {
+                        winMult = count * 2; 
+                    }
                     totalWin += (bet * winMult);
                     linesWon.push(line);
                 }
@@ -210,7 +234,7 @@
                 state = "IDLE";
                 document.getElementById('main-btn').className = "btn-main start";
                 document.getElementById('main-btn').innerText = "START";
-                if(autoMode) setTimeout(handleAction, 1000);
+                if(autoMode) setTimeout(handleAction, 800);
             }
             updateUI();
         }
@@ -221,14 +245,15 @@
                 let path = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
                 let points = "";
                 line.forEach((row, col) => {
-                    let x = (col * 20) + 10; // Faizlə hesablama
-                    let y = (row * 33) + 16;
-                    points += `${x}%,${y}% `;
+                    let x = (col * 100) + 50; 
+                    let y = (row * 120) + 60;
+                    points += `${x},${y} `;
                 });
                 path.setAttribute("points", points);
-                path.setAttribute("stroke", "yellow");
-                path.setAttribute("stroke-width", "4");
+                path.setAttribute("stroke", "rgba(255, 204, 0, 0.8)");
+                path.setAttribute("stroke-width", "6");
                 path.setAttribute("fill", "none");
+                path.setAttribute("stroke-linecap", "round");
                 svg.appendChild(path);
             });
         }
@@ -244,7 +269,7 @@
             clearLines();
             document.getElementById('main-btn').className = "btn-main start";
             document.getElementById('main-btn').innerText = "START";
-            if(autoMode) setTimeout(handleAction, 800);
+            if(autoMode) setTimeout(handleAction, 600);
         }
 
         function updateUI() {
@@ -257,10 +282,11 @@
         function toggleAuto() {
             autoMode = !autoMode;
             document.getElementById('auto-btn').style.background = autoMode ? "var(--neon-green)" : "#222";
+            document.getElementById('auto-btn').style.color = autoMode ? "#000" : "#fff";
             if(autoMode && state === "IDLE") handleAction();
         }
         function tamCixis() { localStorage.removeItem("active_baba_user"); location.reload(); }
-        function unlockAudio() {} // Səs funksiyası ehtiyac olsa bura yazılır
+        function unlockAudio() {}
     </script>
 </body>
 </html>
