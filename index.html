@@ -90,18 +90,16 @@
     </div>
 
     <script>
-        // İSTİFADƏÇİ MƏLUMATLARI VƏ FAİZLƏR
-        const users = { 
-            "1111": { bal: 5000.00, winPercent: 85 },
-            "1765": { bal: 50.00, winPercent: 30 },
-            "6547": { bal: 10.00, winPercent: 15 },
-            "1587": { bal: 25.00, winPercent: 80 }
-        };
+        const users = { "1111": { bal: 5000.00, winPercent: 85 } };
+        let balans = 0, activeLine = 20, activeBet = 1.00, currentWin = 0, inputCode = "", autoMode = false, gameState = "START";
 
-        let balans = 0, activeLine = 20, activeBet = 1.00, currentWin = 0, inputCode = "", autoMode = false, gameState = "START", myWinPercent = 35;
+        // SENİN DEDİYİN DƏQİQ MƏBLƏĞLƏR
         const betSteps = [0.10, 0.20, 0.30, 0.40, 0.50, 1.00, 2.00, 5.00, 10.00, 30.00, 50.00, 100.00, 150.00, 200.00];
 
-        function getBetAmount() { return (activeLine / 20) * activeBet; }
+        function getBetAmount() {
+            // Bahis seçimini 20 xətt üzərindən hesablayırıq ki, Max 200 AZN olsun
+            return (activeLine / 20) * activeBet;
+        }
 
         function updateUI(win = 0) {
             document.getElementById('bal-val').innerText = balans.toFixed(2) + " AZN";
@@ -109,8 +107,6 @@
             document.getElementById('bet-total-val').innerText = getBetAmount().toFixed(2) + " AZN";
             document.getElementById('line-display').innerText = activeLine;
             document.getElementById('bet-display').innerText = activeBet.toFixed(2);
-            // BALANSI YADDAŞA YAZMAQ
-            if(inputCode) localStorage.setItem('baba_pro_bal_' + inputCode, balans);
         }
 
         function openPicker(type) {
@@ -126,19 +122,17 @@
             document.getElementById('picker-modal').style.display = 'flex';
         }
 
-        function setPicker(type, val) { if(type === 'line') activeLine = val; else activeBet = val; updateUI(); closePicker(); }
+        function setPicker(type, val) { 
+            if(type === 'line') activeLine = val; else activeBet = val; 
+            updateUI(); closePicker(); 
+        }
         function closePicker() { document.getElementById('picker-modal').style.display = 'none'; }
         
         function pressKey(num) { if(inputCode.length < 4) { inputCode += num; document.getElementById('code-display').innerText = "*".repeat(inputCode.length); } }
         function resetKeypad() { inputCode = ""; document.getElementById('code-display').innerText = "****"; }
-        
         function checkCode() {
             if(users[inputCode]) {
-                // YADDAŞDAN BALANS OXUMA
-                let saved = localStorage.getItem('baba_pro_bal_' + inputCode);
-                balans = saved ? parseFloat(saved) : users[inputCode].bal;
-                myWinPercent = users[inputCode].winPercent;
-                
+                balans = users[inputCode].bal;
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
                 updateUI(); fillInitialReels();
@@ -166,12 +160,11 @@
 
         function startSpin() {
             let bet = getBetAmount();
-            if (balans < bet) { autoMode = false; alert("Balans çatmır!"); return; }
+            if (balans < bet) return;
             clearWinEffects(); balans -= bet; updateUI(0);
             gameState = "STOP"; updateBtn("STOP", "state-stop");
 
-            // SƏNİN FAİZ MƏNTİQİN
-            let isWin = (Math.random() * 100) < myWinPercent;
+            let isWin = Math.random() < 0.35;
             let winSym = isWin ? items[Math.floor(Math.random() * items.length)] : null;
             let count = isWin ? (Math.random() > 0.8 ? 4 : 3) : 0;
 
