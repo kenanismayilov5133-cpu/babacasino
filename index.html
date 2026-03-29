@@ -3,107 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BABA KAZİNO | Ultra Edition</title>
+    <title>BABA KAZİNO | Admin Control</title>
     <style>
         :root { --gold: #ffcc00; --neon: #39ff14; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
         body { background: #000; color: white; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-        #game-container { width: 100%; max-width: 800px; background: #000; padding: 10px; border-radius: 15px; }
+        /* GİRİŞ PANELİ */
+        #login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .keypad-container {
+            width: 320px; background: #222; border: 4px solid #444; border-radius: 15px; padding: 20px;
+            box-shadow: 0 0 30px #000; text-align: center;
+        }
+        .access-screen {
+            background: #001a00; border: 2px solid #004400; height: 50px; margin-bottom: 20px;
+            display: flex; align-items: center; justify-content: center; font-size: 24px; color: #0f0;
+            font-family: 'Courier New', monospace; letter-spacing: 5px; border-radius: 5px;
+        }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .key-btn {
+            background: #333; border: 1px solid #555; border-radius: 8px;
+            height: 60px; color: white; font-size: 22px; font-weight: bold; cursor: pointer;
+        }
+        .key-btn:active { background: #555; }
+        .key-ok { background: #004400; color: #0f0; border-color: #0f0; }
 
-        /* Slot Makaraları - Şəkildəki kimi qara və səliqəli */
-        .reels-wrapper { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; position: relative; }
-        .reel-col { width: 18%; height: 360px; background: linear-gradient(180deg, #111, #222, #111); border: 1px solid #333; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; }
-        .symbol { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .symbol img { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,100,0,0.3)); }
-
-        /* Panel - Kredit, Udulub, Bahis */
-        .dash { display: grid; grid-template-columns: repeat(3, 1fr); background: #0a0a0a; border-top: 1px solid #444; border-bottom: 1px solid #444; padding: 15px 0; margin-bottom: 20px; }
+        /* OYUN SAHƏSİ (Dəyilmədi) */
+        #game-container { display: none; width: 100%; max-width: 900px; background: #000; padding: 10px; border: 2px solid #222; border-radius: 20px; position: relative; }
+        .reels-wrapper { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 25px; position: relative; padding: 10px; }
+        .reel-col { width: 18%; height: 380px; background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%); border: 2px solid #333; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+        .symbol { width: 100%; height: 126px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .symbol img { width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 0 8px rgba(255,150,0,0.4)); transition: 0.3s; }
+        .win-line { position: absolute; height: 6px; background: yellow; box-shadow: 0 0 15px yellow; z-index: 10; border-radius: 10px; pointer-events: none; }
+        .dash { display: grid; grid-template-columns: repeat(3, 1fr); background: #0a0a0a; border-top: 2px solid #444; border-bottom: 2px solid #444; padding: 15px 0; margin-bottom: 25px; }
         .info-item { text-align: center; border-right: 1px solid #222; }
-        .info-item:last-child { border-right: none; }
-        .info-item span { display: block; font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
-        .info-item strong { display: block; font-size: 22px; color: var(--gold); }
-        .sub-val { font-size: 10px; color: #666; }
-
-        /* Düymələr - Yaşıl START və digərləri */
-        .controls { display: flex; justify-content: space-around; align-items: center; }
-        .btn-side { width: 70px; height: 70px; border-radius: 12px; background: #222; color: #fff; border: 1px solid #444; cursor: pointer; font-size: 12px; font-weight: bold; }
-        .btn-start { width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(#39ff14, #1b5e20); color: white; border: 5px solid #fff; font-weight: bold; font-size: 18px; cursor: pointer; box-shadow: 0 0 20px rgba(57, 255, 20, 0.4); }
-        .btn-start:active { transform: scale(0.95); }
-        .btn-exit { background: #500; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .info-item strong { display: block; font-size: 24px; color: var(--gold); }
+        .bet-input { background: #111; color: var(--gold); border: 1px solid #444; width: 80px; text-align: center; font-size: 18px; font-weight: bold; border-radius: 5px; }
+        .btn-main { width: 110px; height: 110px; border-radius: 50%; color: white; border: 6px solid #fff; font-weight: bold; font-size: 18px; cursor: pointer; }
+        .state-start { background: radial-gradient(#39ff14, #1b5e20); }
+        .state-stop { background: radial-gradient(#ff4b2b, #8b0000); }
+        .state-take { background: radial-gradient(#ffcc00, #b8860b); color: #000; }
+        .win-glow { filter: brightness(1.5) drop-shadow(0 0 15px yellow) !important; transform: scale(1.1); }
     </style>
 </head>
 <body>
 
+    <div id="login-overlay">
+        <h2 id="login-status" style="margin-bottom: 15px; color: #888;">KODU DAXİL EDİN</h2>
+        <div class="keypad-container">
+            <div class="access-screen" id="code-display">****</div>
+            <div class="keypad-grid">
+                <button class="key-btn" onclick="pressKey('1')">1</button>
+                <button class="key-btn" onclick="pressKey('2')">2</button>
+                <button class="key-btn" onclick="pressKey('3')">3</button>
+                <button class="key-btn" onclick="pressKey('4')">4</button>
+                <button class="key-btn" onclick="pressKey('5')">5</button>
+                <button class="key-btn" onclick="pressKey('6')">6</button>
+                <button class="key-btn" onclick="pressKey('7')">7</button>
+                <button class="key-btn" onclick="pressKey('8')">8</button>
+                <button class="key-btn" onclick="pressKey('9')">9</button>
+                <button class="key-btn" onclick="resetKeypad()">C</button>
+                <button class="key-btn" onclick="pressKey('0')">0</button>
+                <button class="key-btn key-ok" onclick="checkCode()">OK</button>
+            </div>
+        </div>
+    </div>
+
     <div id="game-container">
-        <div class="reels-wrapper">
+        <div id="line-layer"></div>
+        <div class="reels-wrapper" id="reels-area">
             <div class="reel-col" id="r1"></div>
             <div class="reel-col" id="r2"></div>
             <div class="reel-col" id="r3"></div>
             <div class="reel-col" id="r4"></div>
             <div class="reel-col" id="r5"></div>
         </div>
-
         <div class="dash">
+            <div class="info-item"><span>BALANS</span><strong id="bal-val">0.00</strong></div>
+            <div class="info-item"><span>UDULUB</span><strong id="win-val">0.00</strong></div>
             <div class="info-item">
-                <span>KREDİT</span>
-                <strong id="bal-val">17000</strong>
-                <span class="sub-val">170.00 AZN</span>
-            </div>
-            <div class="info-item">
-                <span>UDULUB</span>
-                <strong id="win-val">0</strong>
-                <span class="sub-val">0.00 AZN</span>
-            </div>
-            <div class="info-item">
-                <span>BAHİS</span>
-                <strong id="bet-val">200</strong>
-                <span class="sub-val">2.00 AZN</span>
+                <span>BAHİS (AZN)</span>
+                <input type="number" id="bet-input" class="bet-input" value="1.00" step="0.01" min="0.01" max="200">
             </div>
         </div>
-
         <div class="controls">
-            <button class="btn-side">AVTO</button>
-            <button class="btn-start" onclick="spin()">START</button>
-            <button class="btn-exit" onclick="location.reload()">ÇIXIŞ</button>
+            <button class="btn-side" id="auto-btn" onclick="toggleAuto()" style="width:80px; height:80px; border-radius:15px; background:#1a1a1a; color:white; border:2px solid #444; font-weight:bold;">AVTO</button>
+            <button class="btn-main state-start" id="main-btn" onclick="handleMainAction()">START</button>
+            <button class="btn-exit" onclick="location.reload()" style="background:#800; color:white; border:2px solid #a00; padding:12px 25px; border-radius:10px; cursor:pointer; font-weight:bold;">ÇIXIŞ</button>
         </div>
     </div>
 
     <script>
-        // Sənin GitHub-dakı real fayl adların
-        const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
-        
-        const items = [
-            "7.png.jpeg",
-            "gavali.png.jpeg",
-            "limon.png.jpeg",
-            "portagal.png.jpeg",
-            "qarpiz.png.jpeg",
-            "ulduz.png.jpeg",
-            "uzum.png.jpeg"
-        ];
+        // --- ADMIN: MÜŞTƏRİ SİYAHISI VƏ BALANSLAR ---
+        const users = {
+            "1111": 50.00,  // 1-ci adam: Kod 1111, Balans 50 AZN
+            "2222": 100.00, // 2-ci adam: Kod 2222, Balans 100 AZN
+            "3333": 500.00, // 3-cü adam: Kod 3333, Balans 500 AZN
+            "4444": 10.00,  // Bura istədiyin qədər (20 dənə) əlavə edə bilərsən
+            "9999": 1000.00
+        };
 
-        function initReels() {
-            for(let i=1; i<=5; i++) {
-                const reel = document.getElementById('r'+i);
-                reel.innerHTML = '';
-                for(let j=0; j<3; j++) {
-                    const name = items[Math.floor(Math.random() * items.length)];
-                    reel.innerHTML += `<div class="symbol"><img src="${baseUrl + name}"></div>`;
-                }
+        let inputCode = "";
+        let balans = 0;
+
+        function pressKey(num) {
+            if(inputCode.length < 4) {
+                inputCode += num;
+                document.getElementById('code-display').innerText = "*".repeat(inputCode.length);
+            }
+        }
+        function resetKeypad() {
+            inputCode = "";
+            document.getElementById('code-display').innerText = "****";
+        }
+
+        function checkCode() {
+            if(users[inputCode] !== undefined) {
+                balans = users[inputCode]; // Koda uyğun balansı yüklə
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('game-container').style.display = 'block';
+                updateUI(0);
+                fillInitialReels();
+            } else {
+                document.getElementById('login-status').innerText = "KOD SƏHVDİR!";
+                document.getElementById('login-status').style.color = "red";
+                resetKeypad();
             }
         }
 
-        function spin() {
-            let count = 0;
-            const timer = setInterval(() => {
-                initReels();
-                count++;
-                if(count > 12) clearInterval(timer);
-            }, 80);
+        // --- OYUN MƏNTİQİ (Dəyilmədi) ---
+        const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
+        const items = ["7.png.jpeg", "gavali.png.jpeg", "limon.png.jpeg", "portagal.png.jpeg", "qarpiz.png.jpeg", "ulduz.png.jpeg", "uzum.png.jpeg"];
+        let currentWin = 0;
+        let autoMode = false;
+        let gameState = "START";
+        let reelIntervals = [null, null, null, null, null];
+        let stopTimeouts = [];
+
+        function fillInitialReels() { for(let i=0; i<5; i++) fillSingleReel(i); }
+        function fillSingleReel(reelIndex) {
+            const reel = document.getElementById('r'+(reelIndex+1));
+            reel.innerHTML = '';
+            for(let j=0; j<3; j++) {
+                const randomImg = items[Math.floor(Math.random() * items.length)];
+                reel.innerHTML += `<div class="symbol" data-img="${randomImg}" id="s-${reelIndex}-${j}"><img src="${baseUrl + randomImg}"></div>`;
+            }
         }
 
-        window.onload = initReels;
+        function handleMainAction() {
+            if (gameState === "START") startSpin();
+            else if (gameState === "STOP") immediateStop();
+            else if (gameState === "TAKE") takeWin();
+        }
+
+        function startSpin() {
+            let bahis = parseFloat(document.getElementById('bet-input').value);
+            if (balans < bahis) return alert("Balans bitdi!");
+            clearWinEffects();
+            balans -= bahis;
+            updateUI(0);
+            gameState = "STOP";
+            updateBtn("STOP", "state-stop");
+            for(let i=0; i<5; i++) reelIntervals[i] = setInterval(() => fillSingleReel(i), 80);
+            for(let i=0; i<5; i++) {
+                let timeout = setTimeout(() => {
+                    if (reelIntervals[i]) { clearInterval(reelIntervals[i]); reelIntervals[i] = null; if (i === 4) finishSpin(); }
+                }, 1000 + (i * 400));
+                stopTimeouts.push(timeout);
+            }
+        }
+
+        function immediateStop() {
+            stopTimeouts.forEach(t => clearTimeout(t));
+            stopTimeouts = [];
+            reelIntervals.forEach((interval, i) => { if (interval) { clearInterval(interval); reelIntervals[i] = null; } });
+            finishSpin();
+        }
+
+        function finishSpin() {
+            let bahis = parseFloat(document.getElementById('bet-input').value);
+            checkPayout(bahis);
+        }
+
+        function checkPayout(bahis) {
+            let winAmount = 0; let foundWin = false;
+            for (let row = 0; row < 3; row++) {
+                let s1 = document.getElementById(`s-0-${row}`).dataset.img;
+                let s2 = document.getElementById(`s-1-${row}`).dataset.img;
+                let s3 = document.getElementById(`s-2-${row}`).dataset.img;
+                if (s1 === s2 && s2 === s3) {
+                    foundWin = true; winAmount += bahis * 5; drawWinLine(row);
+                    for(let c=0; c<3; c++) document.querySelector(`#s-${c}-${row} img`).classList.add('win-glow');
+                }
+            }
+            if (foundWin) { currentWin = winAmount; updateUI(currentWin); gameState = "TAKE"; updateBtn("TAKE", "state-take"); }
+            else { gameState = "START"; updateBtn("START", "state-start"); if(autoMode) setTimeout(startSpin, 1000); }
+        }
+
+        function takeWin() {
+            balans += currentWin; currentWin = 0; updateUI(0);
+            gameState = "START"; updateBtn("START", "state-start"); clearWinEffects();
+            if(autoMode) setTimeout(startSpin, 500);
+        }
+
+        function drawWinLine(row) {
+            const line = document.createElement('div');
+            line.className = 'win-line';
+            line.style.top = (75 + (row * 126)) + 'px';
+            line.style.left = '5%'; line.style.width = '55%';
+            document.getElementById('line-layer').appendChild(line);
+        }
+
+        function clearWinEffects() {
+            document.getElementById('line-layer').innerHTML = '';
+            document.querySelectorAll('.symbol img').forEach(img => img.classList.remove('win-glow'));
+        }
+
+        function updateBtn(text, className) {
+            const btn = document.getElementById('main-btn');
+            btn.innerText = text; btn.className = "btn-main " + className;
+        }
+
+        function updateUI(win) {
+            document.getElementById('bal-val').innerText = balans.toFixed(2);
+            document.getElementById('win-val').innerText = win.toFixed(2);
+        }
+
+        function toggleAuto() {
+            autoMode = !autoMode;
+            document.getElementById('auto-btn').style.background = autoMode ? "var(--gold)" : "#1a1a1a";
+            if(autoMode && gameState === "START") startSpin();
+        }
     </script>
 </body>
 </html>
