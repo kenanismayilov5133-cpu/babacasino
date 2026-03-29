@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>BABA KAZİNO | Ultra Edition</title>
+    <title>BABA KAZİNO | Pro Edition</title>
     <style>
         :root { --gold: #d4af37; --red: #ff0000; --neon: #00f3ff; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
@@ -25,14 +25,15 @@
         .shake { animation: shake 0.5s; }
         @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 100% { transform: translate(1px, -2px) rotate(0deg); } }
 
+        /* SARI XƏTLƏRİN DÜZƏLİŞİ (Tam simvolların üstünə düşür) */
         #win-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; display: none; }
-        .win-path { stroke: var(--gold); stroke-width: 6; fill: none; stroke-linecap: round; filter: drop-shadow(0 0 12px gold); animation: dash 0.5s infinite; }
-        @keyframes dash { 0% { opacity: 1; stroke-width: 6; } 50% { opacity: 0.5; stroke-width: 10; } }
+        .win-path { stroke: #ffd700; stroke-width: 8; fill: none; stroke-linecap: round; filter: drop-shadow(0 0 15px gold); animation: dash 0.5s infinite; }
+        @keyframes dash { 0% { opacity: 1; } 50% { opacity: 0.6; } }
 
+        /* DASHBOARD */
         .dash { background: #111; display: grid; grid-template-columns: repeat(3, 1fr); padding: 15px; border-top: 2px solid #222; text-align: center; }
         .info-box span { display: block; font-size: 10px; color: #888; }
         .info-box strong { font-size: 18px; color: var(--gold); }
-        .editable-bet { border: 1px dashed var(--gold); padding: 2px; border-radius: 4px; }
 
         .controls { background: #000; padding: 15px; display: flex; justify-content: space-around; align-items: center; gap: 10px; }
         .btn-main { width: 90px; height: 90px; border-radius: 50%; border: 4px solid #fff; background: radial-gradient(#2ecc71, #1b5e20); color: white; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 0 20px rgba(0,255,0,0.4); transition: 0.2s; }
@@ -54,7 +55,7 @@
 
     <div id="game-area">
         <div class="reels-container" id="main-stage">
-            <svg id="win-lines"></svg>
+            <svg id="win-lines" viewBox="0 0 1000 350" preserveAspectRatio="none"></svg>
             <div class="reel-col" id="r1"></div>
             <div class="reel-col" id="r2"></div>
             <div class="reel-col" id="r3"></div>
@@ -63,9 +64,9 @@
         </div>
 
         <div class="dash">
-            <div class="info-box"><span>BALANS</span><strong id="bal-text">118.00</strong></div>
+            <div class="info-box"><span>BALANS</span><strong id="bal-text">0.00</strong></div>
             <div class="info-box"><span>UDUŞ</span><strong id="win-text">0.00</strong></div>
-            <div class="info-box" onclick="manualBet()"><span>MƏRC (Dəyiş)</span><strong id="bet-text" class="editable-bet">1.00</strong></div>
+            <div class="info-box" onclick="manualBet()"><span>MƏRC (Dəyiş)</span><strong id="bet-text">1.00</strong></div>
         </div>
 
         <div class="controls">
@@ -80,10 +81,11 @@
         const s_spin = new Audio('https://freesound.org/data/previews/120/120373_824230-lq.mp3');
         const s_stop = new Audio('https://actions.google.com/sounds/v1/foley/button_click.ogg');
         const s_win = new Audio('https://freesound.org/data/previews/387/387232_1474204-lq.mp3');
-        const s_star_win = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg'); // Ulduz üçün özəl səs
+        const s_star_win = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
         const s_take = new Audio('https://actions.google.com/sounds/v1/cartoon/clink_clank.ogg');
 
-        let balance = 118.00;
+        // Balansı yaddaşda saxlayırıq
+        let balance = parseFloat(localStorage.getItem('babaBalance')) || 118.00;
         let bet = 1.00;
         let pendingWin = 0;
         let masterCode = localStorage.getItem('babaCode') || "12345678901234";
@@ -107,8 +109,20 @@
 
         function login() { if(document.getElementById('display').innerText === masterCode) { document.getElementById('login-screen').style.display='none'; document.getElementById('game-area').style.display='flex'; init(); } }
         function unlockAudio() { [s_spin, s_stop, s_win, s_take, s_star_win].forEach(s => { s.play(); s.pause(); }); }
-        function init() { for(let i=1;i<=5;i++) fill(i); }
-        function fill(id) { let r=document.getElementById('r'+id); r.innerHTML=`<div class="symbol">${symbols[rand()]}</div><div class="symbol">${symbols[rand()]}</div><div class="symbol">${symbols[rand()]}</div>`; }
+        
+        function init() { updateUI(); for(let i=1;i<=5;i++) fill(i); }
+        function fill(id) { 
+            let r=document.getElementById('r'+id); 
+            // Adi fırlanmalarda ulduzları 1 və ya 2 dənə çıxartmaq üçün:
+            let content = "";
+            for(let j=0; j<3; j++) {
+                let s = symbols[rand()];
+                // Əgər starCounter 20-yə çatmayıbsa, ulduz düşmə ehtimalını azaldaq (dediyin kimi 1-2 dənə)
+                if(s === "⭐" && starCounter < 20 && Math.random() > 0.4) s = symbols[0]; 
+                content += `<div class="symbol">${s}</div>`;
+            }
+            r.innerHTML = content;
+        }
         function rand() { return Math.floor(Math.random()*symbols.length); }
 
         function handleAction() {
@@ -125,6 +139,7 @@
         function startSpin() {
             state = "SPINNING";
             balance -= bet;
+            saveBalance(); // Balansı hər dəfə azaldanda yadda saxla
             pendingWin = 0;
             starCounter++; 
             updateUI();
@@ -170,31 +185,33 @@
             let isStarWin = false;
             let isSevenWin = false;
 
-            if(Math.random() * 100 < 2) isSevenWin = true;
+            // 777 UDUŞU - 100 QAT!
+            if(Math.random() * 100 < 1.5) isSevenWin = true;
 
-            if(!isSevenWin && starCounter >= (Math.floor(Math.random()*6)+15)) {
+            // 20-ci Fırlanmada 3 Ulduz Gəlsin
+            if(!isSevenWin && starCounter >= 20) {
                 isStarWin = true;
                 starCounter = 0;
             }
 
             if(isSevenWin) {
                 state = "WINNING";
-                pendingWin = bet * 20; 
+                pendingWin = bet * 100; // 100 QAT!
                 for(let i=1; i<=4; i++) {
                     document.getElementById('r'+i).innerHTML = `<div class="symbol">7️⃣</div><div class="symbol">7️⃣</div><div class="symbol">7️⃣</div>`;
                 }
                 showWinEffects(false);
             } else if(isStarWin) {
                 state = "WINNING";
-                pendingWin = bet * 2; // ULDUZ UDUŞU 2 QAT OLDU
-                for(let i=1; i<=3; i++) { // MAKSİMUM 3 ULDUZ DÜŞÜR
+                pendingWin = bet * 5; 
+                for(let i=1; i<=3; i++) {
                     document.getElementById('r'+i).innerHTML = `<div class="symbol">⭐</div><div class="symbol">⭐</div><div class="symbol">⭐</div>`;
                 }
-                for(let i=4; i<=5; i++) fill(i); // QALANLARI QARIŞIQ ET
-                showWinEffects(true); // ULDUZ ÜÇÜN ÖZƏL SƏS VƏ EFFEKT
+                for(let i=4; i<=5; i++) fill(i);
+                showWinEffects(true);
             } else if((Math.random() * 100) < winRate) {
                 state = "WINNING";
-                pendingWin = bet * (Math.floor(Math.random()*5)+1.5);
+                pendingWin = bet * (Math.floor(Math.random()*5)+2);
                 showWinEffects(false);
             } else {
                 btn.innerText = "START";
@@ -210,18 +227,19 @@
             document.getElementById('main-stage').classList.add('shake');
             btn.innerText = "TAKE";
             btn.className = "btn-main take";
-            
-            if(isStar) s_star_win.play(); // Ulduz gələndə fərqli səs
+            if(isStar) s_star_win.play();
             else s_win.play();
-            
             if(autoMode) setTimeout(takeMoney, 1000);
         }
 
         function drawWinLines() {
             const svg = document.getElementById('win-lines');
-            svg.innerHTML = `<path class="win-path" d="M 0 100 L 1000 100" />
-                             <path class="win-path" d="M 0 200 L 1000 200" />
-                             <path class="win-path" d="M 0 175 L 500 25 L 1000 175" />`;
+            // Sarı xətləri tam mərkəzə düzəltdim (60, 175, 290 koordinatları ilə)
+            svg.innerHTML = `
+                <path class="win-path" d="M 0 60 L 1000 60" />
+                <path class="win-path" d="M 0 175 L 1000 175" />
+                <path class="win-path" d="M 0 290 L 1000 290" />
+            `;
             svg.style.display = 'block';
         }
 
@@ -229,6 +247,7 @@
             if(pendingWin <= 0) return;
             s_take.play();
             balance += pendingWin;
+            saveBalance(); // Uduşu götürəndə yadda saxla
             pendingWin = 0;
             state = "IDLE";
             document.getElementById('win-lines').style.display = 'none';
@@ -238,6 +257,10 @@
             btn.className = "btn-main";
             updateUI();
             if(autoMode) setTimeout(handleAction, 500);
+        }
+
+        function saveBalance() {
+            localStorage.setItem('babaBalance', balance.toFixed(2));
         }
 
         function toggleAuto() {
@@ -265,7 +288,11 @@
             if(p == '777') {
                 let action = prompt("1: Uduş Şansı Değiş\n2: Balans Değiş\n3: Giriş Şifrəsini Değiş");
                 if(action == "1") winRate = prompt('Uduş Şansı %:', winRate);
-                if(action == "2") { balance = parseFloat(prompt('Yeni Balans:', balance)); updateUI(); }
+                if(action == "2") { 
+                    balance = parseFloat(prompt('Yeni Balans:', balance)); 
+                    saveBalance(); // Admin panelindən dəyişəndə də yadda saxla
+                    updateUI(); 
+                }
                 if(action == "3") {
                     let newCode = prompt("Yeni giriş şifrəsini yaz:", masterCode);
                     if(newCode) {
