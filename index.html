@@ -26,49 +26,71 @@
 
         /* ADMİN PANEL */
         #admin-panel { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0a; z-index: 1000; overflow-y: auto; padding: 20px; }
-        .admin-box { max-width: 600px; margin: 0 auto; background: #151515; padding: 20px; border-radius: 15px; border: 1px solid var(--gold); box-shadow: 0 0 20px rgba(255, 204, 0, 0.2); }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: var(--gold); }
-        .user-item { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px; border-left: 4px solid var(--gold); }
+        .admin-box { max-width: 700px; margin: 0 auto; background: #151515; padding: 20px; border-radius: 15px; border: 1px solid var(--gold); }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: var(--gold); border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .add-user-row { display: flex; gap: 5px; margin-bottom: 20px; background: #222; padding: 10px; border-radius: 8px; }
+        .admin-input { background: #000; border: 1px solid #444; color: #fff; padding: 8px; border-radius: 5px; width: 100%; }
+        .user-item { background: #1a1a1a; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--gold); }
+        .user-info { flex: 1; font-weight: bold; color: var(--gold); }
+        .admin-btn { padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-save { background: var(--neon); color: #000; }
+        .btn-delete { background: var(--red); color: #fff; }
 
         /* OYUN SAHƏSİ */
         #game-container { display: none; width: 100%; max-width: 950px; background: rgba(20, 20, 30, 0.95); padding: 15px; border: 3px solid #444; border-radius: 15px; position: relative; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
         .reels-wrapper { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; padding: 10px; background: #000; border-radius: 10px; position: relative; border: 2px solid var(--blue); background-image: var(--bg-grad); box-shadow: inset 0 0 20px rgba(0, 191, 255, 0.2); }
         .reel-col { width: 19%; height: 380px; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
         .symbol { width: 100%; height: 126px; display: flex; align-items: center; justify-content: center; }
-        .symbol img { width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
-        .win-line-overlay { position: absolute; height: 8px; background: #fff; box-shadow: 0 0 20px #fff, 0 0 40px var(--blue); z-index: 100; border-radius: 4px; pointer-events: none; display: none; }
+        .symbol img { width: 95px; height: 95px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); transition: 0.3s; }
+        .win-line-overlay { position: absolute; height: 6px; background: #fff; box-shadow: 0 0 15px #fff, 0 0 30px var(--blue); z-index: 100; border-radius: 4px; pointer-events: none; display: none; }
         .dash { display: flex; justify-content: space-around; background: #111; border: 2px solid var(--purple); padding: 12px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 0 15px rgba(138, 43, 226, 0.3); }
         .info-item { text-align: center; }
         .info-item span { display: block; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
         .info-item strong { display: block; font-size: 20px; color: var(--gold); text-shadow: 0 0 10px var(--gold); }
-        .control-panel { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
+        .control-panel { display: flex; justify-content: space-around; align-items: center; gap: 5px; }
         .btn-rect { background: #333; border: 2px solid #555; color: white; padding: 10px 5px; border-radius: 8px; cursor: pointer; font-weight: bold; min-width: 75px; text-align: center; font-size: 12px; transition: 0.2s; }
         .main-btn { width: 110px; height: 110px; border-radius: 50%; border: 8px solid #1b5e20; background: radial-gradient(circle, #fff, #ccc); color: #000; font-size: 18px; font-weight: 900; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transition: 0.2s; }
         .main-btn.stop { border-color: #b71c1c; background: #ff5252; color: #fff; }
         .main-btn.take { border-color: #fbc02d; background: var(--gold); color: #000; animation: glowPulse 0.8s infinite; }
         @keyframes glowPulse { 0% { box-shadow: 0 0 5px var(--gold); } 50% { box-shadow: 0 0 30px var(--gold); } 100% { box-shadow: 0 0 5px var(--gold); } }
-        .win-glow { filter: brightness(1.5) drop-shadow(0 0 20px #fff) !important; transform: scale(1.15); transition: 0.3s; }
+        .win-glow { filter: brightness(1.5) drop-shadow(0 0 20px #fff) !important; transform: scale(1.15); }
         .star-glow { filter: brightness(1.7) drop-shadow(0 0 25px var(--gold)) !important; animation: starPulse 0.5s infinite alternate; }
         @keyframes starPulse { from { transform: scale(1.1); } to { transform: scale(1.25); } }
     </style>
 </head>
 <body>
+    <audio id="snd-spin" src="https://assets.mixkit.co/active_storage/sfx/2019/2019-preview.mp3" preload="auto"></audio>
+    <audio id="snd-win" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3" preload="auto"></audio>
+    <audio id="snd-collect" src="https://assets.mixkit.co/active_storage/sfx/2017/2017-preview.mp3" preload="auto"></audio>
+
     <div id="login-overlay">
         <div class="keypad-container">
             <div class="access-screen" id="code-display">****</div>
             <div class="keypad-grid" id="keys"></div>
         </div>
     </div>
+    
     <div id="admin-panel">
         <div class="admin-box">
-            <div class="admin-header"><h2>BABA PANEL VIP</h2><button class="admin-btn btn-delete" onclick="location.reload()">BAĞLA</button></div>
+            <div class="admin-header">
+                <h2>BABA PANEL VIP</h2>
+                <button class="admin-btn btn-delete" onclick="location.reload()">ÇIXIŞ</button>
+            </div>
+            <div class="add-user-row">
+                <input type="text" id="new-code" class="admin-input" placeholder="Kod">
+                <input type="number" id="new-bal" class="admin-input" placeholder="Balans">
+                <input type="number" id="new-perc" class="admin-input" placeholder="Faiz %" value="25">
+                <button class="admin-btn btn-save" onclick="addNewUser()">+</button>
+            </div>
             <div id="user-list">Yüklənir...</div>
         </div>
     </div>
 
     <div id="game-container">
         <div class="reels-wrapper" id="reels-area">
-            <div id="line-0" class="win-line-overlay"></div><div id="line-1" class="win-line-overlay"></div><div id="line-2" class="win-line-overlay"></div>
+            <div id="line-0" class="win-line-overlay"></div>
+            <div id="line-1" class="win-line-overlay"></div>
+            <div id="line-2" class="win-line-overlay"></div>
             <div class="reel-col" id="r1"></div><div class="reel-col" id="r2"></div><div class="reel-col" id="r3"></div><div class="reel-col" id="r4"></div><div class="reel-col" id="r5"></div>
         </div>
         <div class="dash">
@@ -77,7 +99,8 @@
             <div class="info-item"><span>CƏMİ MƏRC</span><strong id="bet-total">0.20</strong></div>
         </div>
         <div class="control-panel">
-            <button class="btn-rect">RİSK</button><button class="btn-rect" onclick="toggleAuto()" id="auto-btn">AVTO</button>
+            <button class="btn-rect">RİSK</button>
+            <button class="btn-rect" onclick="toggleAuto()" id="auto-btn">AVTO</button>
             <button class="main-btn" id="main-btn" onclick="handleAction()">START</button>
             <button class="btn-rect" onclick="changeLines()">XƏTT<br><b id="line-val">20</b></button>
             <button class="btn-rect" onclick="changeBet()">MƏRC<br><b id="bet-val">0.01</b></button>
@@ -94,7 +117,13 @@
         let intervals = [null, null, null, null, null], stopTimeouts = [];
         let totalSpins = 0; let nextStarSpin = Math.floor(Math.random() * 5) + 15;
 
-        // Klaviatura
+        // SES FUNKSİYALARI
+        function playSnd(id) { 
+            const s = document.getElementById(id);
+            s.currentTime = 0;
+            s.play().catch(()=>{}); 
+        }
+
         const keyArea = document.getElementById('keys');
         [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
             let b = document.createElement('button'); b.className = 'key-btn'; b.innerText = k;
@@ -122,12 +151,36 @@
         function openAdmin() { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('admin-panel').style.display = 'block'; loadUsers(); }
         async function loadUsers() {
             let res = await fetch(`${DB_URL}.json`); let users = await res.json(); let html = "";
-            for(let id in users) { html += `<div class="user-item"><strong>KOD: ${id}</strong> | Bal: ${users[id].bal} <button class="admin-btn btn-save" onclick="location.reload()">OK</button></div>`; }
+            for(let id in users) { 
+                html += `<div class="user-item"><div class="user-info">ID: ${id}</div>
+                <input type="number" id="bal-${id}" class="admin-input" style="width:100px" value="${users[id].bal}">
+                <input type="number" id="perc-${id}" class="admin-input" style="width:70px" value="${users[id].perc || 25}">
+                <button class="admin-btn btn-save" onclick="updateUser('${id}')">OK</button>
+                <button class="admin-btn btn-delete" onclick="deleteUser('${id}')">X</button></div>`; 
+            }
             document.getElementById('user-list').innerHTML = html;
         }
 
+        async function addNewUser() {
+            let id = document.getElementById('new-code').value;
+            let bal = parseFloat(document.getElementById('new-bal').value) || 0;
+            let perc = parseInt(document.getElementById('new-perc').value) || 25;
+            if(!id) return;
+            await fetch(`${DB_URL}/${id}.json`, { method: 'PUT', body: JSON.stringify({ bal, perc }) });
+            loadUsers();
+        }
+
+        async function updateUser(id) {
+            let bal = parseFloat(document.getElementById(`bal-${id}`).value);
+            let perc = parseInt(document.getElementById(`perc-${id}`).value);
+            await fetch(`${DB_URL}/${id}.json`, { method: 'PATCH', body: JSON.stringify({ bal, perc }) });
+        }
+
+        async function deleteUser(id) { if(confirm("Silinsin?")) { await fetch(`${DB_URL}/${id}.json`, { method: 'DELETE' }); loadUsers(); } }
+
         function changeLines() { activeLine = activeLine >= 20 ? 1 : activeLine + 1; document.getElementById('line-val').innerText = activeLine; updateUI(); }
         function changeBet() { betIndex = (betIndex + 1) % betList.length; document.getElementById('bet-val').innerText = betList[betIndex].toFixed(2); updateUI(); }
+        
         function updateUI(w=0) {
             document.getElementById('bal-val').innerText = balans.toFixed(2);
             document.getElementById('win-val').innerText = w.toFixed(2);
@@ -155,6 +208,7 @@
             let totalBet = activeLine * betList[betIndex];
             if(gameState === "START") {
                 if(balans < totalBet) return alert("Balans azdır!");
+                playSnd('snd-spin');
                 balans -= totalBet; updateUI(); clearWinEffects(); gameState = "SPIN"; totalSpins++;
                 document.getElementById('main-btn').innerText = "STOP"; document.getElementById('main-btn').classList.add('stop');
                 for(let i=1; i<=5; i++) intervals[i-1] = setInterval(() => fillReels(i), 70);
@@ -163,6 +217,7 @@
                 stopTimeouts.forEach(clearTimeout); intervals.forEach(clearInterval);
                 for(let i=1; i<=5; i++) fillReels(i); checkPayout();
             } else if(gameState === "TAKE") {
+                playSnd('snd-collect');
                 balans += currentWin; currentWin = 0; updateUI(); gameState = "START";
                 document.getElementById('main-btn').innerText = "START"; document.getElementById('main-btn').classList.remove('take');
                 clearWinEffects(); if(autoMode) setTimeout(handleAction, 500);
@@ -170,63 +225,85 @@
         }
 
         function checkPayout() {
-            let totalWin = 0; let winDetails = []; let singleBet = betList[betIndex];
-            let starCount = 0;
-            document.querySelectorAll('.symbol').forEach(s => { if(s.dataset.sym === "ulduz.png.jpeg") starCount++; });
+            let totalWin = 0; 
+            let winDetails = []; 
+            let singleBet = betList[betIndex];
             
-            // STAR UDUŞU (Cəmi mərcin 5 qatı)
-            if(starCount >= 3) {
-                totalWin += (activeLine * singleBet) * 5; totalSpins = 0;
-                document.querySelectorAll('.symbol').forEach(s => { if(s.dataset.sym === "ulduz.png.jpeg") s.querySelector('img').classList.add('star-glow'); });
+            let stars = [];
+            for(let c=0; c<5; c++) {
+                for(let r=0; r<3; r++) {
+                    if(document.getElementById(`s-${c}-${r}`).getAttribute('data-sym') === "ulduz.png.jpeg") {
+                        stars.push({c, r});
+                    }
+                }
+            }
+            if(stars.length >= 3) {
+                totalWin += (activeLine * singleBet) * 5;
+                stars.forEach(s => document.querySelector(`#s-${s.c}-${s.r} img`).classList.add('star-glow'));
             }
 
             for (let row = 0; row < 3; row++) {
-                let first = document.getElementById(`s-0-${row}`).dataset.sym;
-                if(first === "ulduz.png.jpeg") continue;
-                let matches = 1;
+                let firstSym = document.getElementById(`s-0-${row}`).getAttribute('data-sym');
+                if(firstSym === "ulduz.png.jpeg") continue; 
+
+                let count = 1;
                 for (let col = 1; col < 5; col++) {
-                    if (document.getElementById(`s-${col}-${row}`).dataset.sym === first) matches++; else break;
+                    if (document.getElementById(`s-${col}-${row}`).getAttribute('data-sym') === firstSym) {
+                        count++;
+                    } else {
+                        break;
+                    }
                 }
 
-                if (matches >= 3) {
-                    let mult = 0;
-                    // HƏR MEYVƏYƏ AYRI VƏ SANBALLI UDUŞLAR
-                    if(first === "7.png.jpeg") {
-                        mult = (matches === 3 ? 100 : (matches === 4 ? 500 : 2500)); // 7-LƏR (5 dənə = 2500x)
-                    } else if(first === "qarpiz.png.jpeg") {
-                        mult = (matches === 3 ? 40 : (matches === 4 ? 150 : 800)); // Qarpız
-                    } else if(first === "uzum.png.jpeg") {
-                        mult = (matches === 3 ? 30 : (matches === 4 ? 100 : 500)); // Üzüm
-                    } else if(first === "gavali.png.jpeg") {
-                        mult = (matches === 3 ? 20 : (matches === 4 ? 60 : 300)); // Gavalı
-                    } else if(first === "portagal.png.jpeg" || first === "limon.png.jpeg") {
-                        mult = (matches === 3 ? 10 : (matches === 4 ? 40 : 200)); // Portağal və Limon
-                    }
-
-                    totalWin += singleBet * mult;
-                    winDetails.push({row, matches});
+                if (count >= 3) {
+                    let multiplier = 0;
+                    if(firstSym === "7.png.jpeg") multiplier = (count === 3 ? 100 : (count === 4 ? 400 : 2000));
+                    else if(firstSym === "qarpiz.png.jpeg") multiplier = (count === 3 ? 40 : (count === 4 ? 100 : 500));
+                    else if(firstSym === "uzum.png.jpeg") multiplier = (count === 3 ? 30 : (count === 4 ? 80 : 400));
+                    else if(firstSym === "gavali.png.jpeg") multiplier = (count === 3 ? 20 : (count === 4 ? 50 : 250));
+                    else if(firstSym === "portagal.png.jpeg" || firstSym === "limon.png.jpeg") multiplier = (count === 3 ? 10 : (count === 4 ? 30 : 150));
+                    
+                    totalWin += singleBet * multiplier;
+                    winDetails.push({row, count});
                 }
             }
 
             if (totalWin > 0) {
-                currentWin = totalWin; updateUI(currentWin); gameState = "TAKE";
-                let b = document.getElementById('main-btn'); b.innerText = "TAKE"; b.classList.remove('stop'); b.classList.add('take');
-                applyVisuals(winDetails);
+                playSnd('snd-win');
+                currentWin = totalWin;
+                document.getElementById('win-val').innerText = currentWin.toFixed(2);
+                gameState = "TAKE";
+                let btn = document.getElementById('main-btn');
+                btn.innerText = "TAKE"; btn.classList.remove('stop'); btn.classList.add('take');
+                
+                winDetails.forEach(w => {
+                    let line = document.getElementById(`line-${w.row}`);
+                    line.style.display = 'block';
+                    line.style.top = (63 + (w.row * 126)) + 'px';
+                    line.style.width = (w.count * 20) + '%';
+                    line.style.left = '0';
+                    for(let i=0; i<w.count; i++) {
+                        document.querySelector(`#s-${i}-${w.row} img`).classList.add('win-glow');
+                    }
+                });
             } else {
-                gameState = "START"; document.getElementById('main-btn').innerText = "START";
-                document.getElementById('main-btn').classList.remove('stop'); if(autoMode) setTimeout(handleAction, 800);
+                gameState = "START";
+                document.getElementById('main-btn').innerText = "START";
+                document.getElementById('main-btn').classList.remove('stop');
+                if(autoMode) setTimeout(handleAction, 800);
             }
         }
 
-        function applyVisuals(details) {
-            details.forEach(w => {
-                let l = document.getElementById(`line-${w.row}`); l.style.display = 'block'; 
-                l.style.top = (63+(w.row*126))+'px'; l.style.width = (w.matches*19)+'%';
-                for(let c=0; c<w.matches; c++) document.querySelector(`#s-${c}-${w.row} img`).classList.add('win-glow');
-            });
+        function clearWinEffects() {
+            document.querySelectorAll('.win-line-overlay').forEach(l => l.style.display='none');
+            document.querySelectorAll('.symbol img').forEach(i => i.classList.remove('win-glow', 'star-glow'));
         }
-        function clearWinEffects() { document.querySelectorAll('.win-line-overlay').forEach(l => l.style.display='none'); document.querySelectorAll('.symbol img').forEach(i => i.classList.remove('win-glow', 'star-glow')); }
-        function toggleAuto() { autoMode = !autoMode; document.getElementById('auto-btn').style.background = autoMode ? 'var(--neon)' : '#333'; if(autoMode && gameState === "START") handleAction(); }
+        
+        function toggleAuto() {
+            autoMode = !autoMode;
+            document.getElementById('auto-btn').style.background = autoMode ? 'var(--neon)' : '#333';
+            if(autoMode && gameState === "START") handleAction();
+        }
     </script>
 </body>
 </html>
