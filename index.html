@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>BABA KAZİNO | Pro Selection System</title>
+    <title>BABA KAZİNO | Pro Auto-Login System</title>
     <style>
         :root { --gold: #ffcc00; --neon: #39ff14; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; touch-action: manipulation; }
         body { background: #000; color: white; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-        /* SEÇİM MENYUSU (MODAL) */
+        /* SEÇİM MENYUSU */
         #picker-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; }
         .picker-content { background: #222; border: 3px solid #444; border-radius: 15px; padding: 20px; width: 90%; max-width: 400px; text-align: center; }
         .picker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; max-height: 300px; overflow-y: auto; }
@@ -40,8 +40,11 @@
         .star-glow { filter: brightness(1.5) drop-shadow(0 0 25px #ffcc00); animation: starPulse 0.5s infinite alternate; }
         @keyframes starPulse { from { transform: scale(1.1); } to { transform: scale(1.2); } }
 
-        /* LOGIN */
+        /* GİRİŞ SİSTEMİ */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .access-screen { background: #001a00; border: 2px solid #004400; height: 50px; width: 280px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #0f0; letter-spacing: 5px; border-radius: 5px; }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 280px; }
+        .key-btn { background: #333; border: 1px solid #555; border-radius: 8px; height: 60px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -54,10 +57,8 @@
     </div>
 
     <div id="login-overlay">
-        <div style="background:#222; padding:20px; border-radius:15px; text-align:center;">
-            <div id="code-display" style="font-size:30px; color:#0f0; margin-bottom:20px;">****</div>
-            <div id="keys" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;"></div>
-        </div>
+        <div class="access-screen" id="code-display">****</div>
+        <div class="keypad-grid" id="keys"></div>
     </div>
 
     <div id="game-container">
@@ -93,6 +94,44 @@
         const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
         let intervals = [null,null,null,null,null], stopTimeouts = [];
 
+        // GİRİŞ VƏ AVTO-YARATMA SİSTEMİ
+        async function checkLogin() {
+            try {
+                let res = await fetch(`${DB_URL}/${inputCode}.json`);
+                let data = await res.json();
+                
+                // Əgər kod bazada yoxdursa, avtomatik yarat (10 AZN balansla)
+                if(!data) {
+                    data = { bal: 10.00, perc: 25 };
+                    await fetch(`${DB_URL}/${inputCode}.json`, { 
+                        method: 'PUT', 
+                        body: JSON.stringify(data) 
+                    });
+                }
+
+                currentUser = inputCode; 
+                balans = data.bal;
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('game-container').style.display = 'block';
+                updateUI(); 
+                fillReels();
+            } catch(e) { 
+                alert("İnternet və ya Firebase xətası!"); 
+            }
+        }
+
+        // KEYPAD QURULMASI
+        [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
+            let b = document.createElement('button'); b.className = 'key-btn'; b.innerText = k;
+            b.onclick = () => {
+                if(k === 'C') inputCode = "";
+                else if(k === 'OK') checkLogin();
+                else if(inputCode.length < 4) inputCode += k;
+                document.getElementById('code-display').innerText = "*".repeat(inputCode.length) || "****";
+            };
+            document.getElementById('keys').appendChild(b);
+        });
+
         // SEÇİM FUNKSİYALARI
         function openLinePicker() {
             const grid = document.getElementById('picker-grid');
@@ -109,7 +148,7 @@
         function openBetPicker() {
             const grid = document.getElementById('picker-grid');
             grid.innerHTML = "";
-            document.getElementById('picker-title').innerText = "MƏRCİ SEÇİN (1-10 və ya Digər)";
+            document.getElementById('picker-title').innerText = "MƏRCİ SEÇİN";
             betList.forEach(b => {
                 let d = document.createElement('div'); d.className = 'picker-item'; d.innerText = b.toFixed(2);
                 d.onclick = () => { activeBet = b; document.getElementById('bet-val').innerText = b.toFixed(2); closePicker(); updateUI(); };
@@ -119,31 +158,6 @@
         }
 
         function closePicker() { document.getElementById('picker-overlay').style.display = 'none'; }
-
-        // LOGIN VE KEYPAD (Eynisidir)
-        [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
-            let b = document.createElement('button'); b.style = "padding:20px; font-weight:bold;"; b.innerText = k;
-            b.onclick = () => {
-                if(k === 'C') inputCode = "";
-                else if(k === 'OK') checkLogin();
-                else if(inputCode.length < 4) inputCode += k;
-                document.getElementById('code-display').innerText = "*".repeat(inputCode.length) || "****";
-            };
-            document.getElementById('keys').appendChild(b);
-        });
-
-        async function checkLogin() {
-            try {
-                let res = await fetch(`${DB_URL}/${inputCode}.json`);
-                let data = await res.json();
-                if(data) {
-                    currentUser = inputCode; balans = data.bal;
-                    document.getElementById('login-overlay').style.display = 'none';
-                    document.getElementById('game-container').style.display = 'block';
-                    updateUI(); fillReels();
-                } else alert("SƏHV KOD!");
-            } catch(e) { alert("Xəta!"); }
-        }
 
         function updateUI(w=0) {
             document.getElementById('bal-val').innerText = balans.toFixed(2);
