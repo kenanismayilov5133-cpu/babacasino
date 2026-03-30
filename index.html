@@ -21,20 +21,20 @@
         #admin-panel { display: none; width: 95%; max-width: 500px; background: #1a1a1a; border: 2px solid var(--gold); border-radius: 15px; padding: 20px; z-index: 1000; max-height: 85vh; overflow-y: auto; }
         .admin-input { background: #333; border: 1px solid var(--gold); color: white; padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; }
         .admin-btn { background: var(--gold); color: black; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; }
-        .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; font-size: 14px; }
+        .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; font-size: 14px; align-items: center; }
 
         /* OYUN SAHƏSİ */
         #game-container { display: none; width: 100%; max-width: 950px; background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); padding: 15px; border: 3px solid #333; border-radius: 15px; position: relative; }
         .reels-wrapper { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 10px; }
         .reel-col { width: 19%; height: 380px; background: #0a0a0a; border: 1px solid #444; border-radius: 8px; overflow: hidden; }
         .symbol { width: 100%; height: 126px; display: flex; align-items: center; justify-content: center; }
-        .symbol img { width: 90px; height: 90px; object-fit: contain; transition: 0.3s; }
+        .symbol img { width: 90px; height: 90px; object-fit: contain; }
         .dash { display: flex; justify-content: space-around; background: #111; border: 2px solid #444; padding: 10px; margin-bottom: 20px; border-radius: 10px; }
         .info-item { text-align: center; }
         .info-item span { font-size: 10px; color: #888; display: block; }
         .info-item strong { font-size: 18px; color: var(--gold); }
         .start-btn { width: 120px; height: 120px; border-radius: 50%; background: #fff; color: #000; font-size: 22px; font-weight: 900; border: 8px solid #2e7d32; cursor: pointer; }
-        .win-glow { filter: brightness(1.5) drop-shadow(0 0 15px yellow); transform: scale(1.1); }
+        .win-glow { filter: brightness(1.5) drop-shadow(0 0 15px yellow); transform: scale(1.1); transition: 0.3s; }
     </style>
 </head>
 <body>
@@ -42,19 +42,21 @@
     <div id="login-overlay">
         <h2 style="color:#888; margin-bottom:10px;">GİRİŞ</h2>
         <div class="keypad-container">
-            <div class="access-screen" id="code-display">******</div>
+            <div class="access-screen" id="code-display">****</div>
             <div class="keypad-grid" id="keys"></div>
         </div>
     </div>
 
     <div id="admin-panel">
-        <h2 style="color:var(--gold)">ADMIN PANEL</h2>
-        <input type="text" id="adm-code" class="admin-input" placeholder="Kod (4 rəqəm)">
-        <input type="number" id="adm-bal" class="admin-input" placeholder="Balans">
-        <input type="number" id="adm-perc" class="admin-input" placeholder="Uduş %">
-        <button class="admin-btn" onclick="saveUser()">AKTİV ET</button>
+        <h2 style="color:var(--gold); border-bottom: 1px solid #444; padding-bottom: 10px;">BABA ADMIN PANEL</h2>
+        <div style="margin-top: 15px;">
+            <input type="text" id="adm-code" class="admin-input" placeholder="Oyunçu Kodu (4 rəqəm)">
+            <input type="number" id="adm-bal" class="admin-input" placeholder="Yüklənəcək Balans (AZN)">
+            <input type="number" id="adm-perc" class="admin-input" placeholder="Uduş Şansı (1-100%)">
+            <button class="admin-btn" onclick="saveUser()">OYUNÇUNU AKTİV ET</button>
+        </div>
         <div id="user-list" style="margin-top:20px"></div>
-        <button onclick="location.reload()" class="admin-btn" style="background:#444; color:#fff; margin-top:10px">ÇIXIŞ</button>
+        <button onclick="location.reload()" class="admin-btn" style="background:#444; color:#fff; margin-top:10px">SİSTEMDƏN ÇIX</button>
     </div>
 
     <div id="game-container">
@@ -67,17 +69,17 @@
             <div class="info-item"><span>MƏRC</span><strong>1.00</strong></div>
         </div>
         <div style="display:flex; justify-content:center; gap:30px; align-items:center;">
-            <button onclick="toggleAuto()" id="auto-btn" style="background:none; border:2px solid var(--gold); color:white; width:60px; height:60px; border-radius:50%">AVTO</button>
+            <button onclick="toggleAuto()" id="auto-btn" style="background:none; border:2px solid var(--gold); color:white; width:60px; height:60px; border-radius:50%; font-size: 10px;">AVTO</button>
             <button class="start-btn" id="main-btn" onclick="handleSpin()">START</button>
         </div>
     </div>
 
     <script>
         const DB_URL = "https://babacasino-9fca0-default-rtdb.firebaseio.com/users";
-        const ADMIN_PASS = "007163";
-        let currentUser = null, balans = 0, winPerc = 20, inputCode = "", gameState = "START", autoMode = false;
+        const ADMIN_PASS = "0071"; // YENİ ADMIN KODUN
+        let currentUser = null, balans = 0, winPerc = 20, inputCode = "", gameState = "START", autoMode = false, currentWin = 0;
 
-        // Keypad Yaradılması
+        // Keypad
         const keyArea = document.getElementById('keys');
         [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
             let b = document.createElement('button'); b.className = 'key-btn'; b.innerText = k;
@@ -86,7 +88,7 @@
                 if(k === 'C') { inputCode = ""; }
                 else if(k === 'OK') { checkLogin(); }
                 else { if(inputCode.length < 6) inputCode += k; }
-                document.getElementById('code-display').innerText = "*".repeat(inputCode.length) || "******";
+                document.getElementById('code-display').innerText = "*".repeat(inputCode.length) || "****";
             };
             keyArea.appendChild(b);
         });
@@ -100,7 +102,7 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
                 updateUI(); fillReels();
-            } else { alert("KOD SƏHVDİR!"); inputCode = ""; }
+            } else { alert("KOD SƏHVDİR!"); inputCode = ""; document.getElementById('code-display').innerText = "****"; }
         }
 
         function showAdmin() {
@@ -113,20 +115,22 @@
             let c = document.getElementById('adm-code').value;
             let b = document.getElementById('adm-bal').value;
             let p = document.getElementById('adm-perc').value;
-            await fetch(`${DB_URL}/${c}.json`, { method: 'PUT', body: JSON.stringify({bal: parseFloat(b), perc: parseInt(p)}) });
+            if(!c || !b) return alert("Məlumatları doldur!");
+            await fetch(`${DB_URL}/${c}.json`, { method: 'PUT', body: JSON.stringify({bal: parseFloat(b), perc: parseInt(p || 20)}) });
+            document.getElementById('adm-code').value = ""; document.getElementById('adm-bal').value = "";
             loadUsers();
         }
 
         async function loadUsers() {
             let res = await fetch(`${DB_URL}.json`);
             let data = await res.json();
-            let list = document.getElementById('user-list'); list.innerHTML = "";
+            let list = document.getElementById('user-list'); list.innerHTML = "<h3 style='font-size:12px; color:#888; margin:10px 0'>AKTİV OYUNÇULAR:</h3>";
             for(let k in data) {
-                list.innerHTML += `<div class="user-row"><span>${k} - ${data[k].bal}AZN</span><button onclick="delUser('${k}')" style="color:red">SİL</button></div>`;
+                list.innerHTML += `<div class="user-row"><span><b>${k}</b>: ${data[k].bal.toFixed(2)} AZN (${data[k].perc}%)</span><button onclick="delUser('${k}')" style="color:red; border:none; background:none; font-weight:bold; cursor:pointer">SİL</button></div>`;
             }
         }
 
-        async function delUser(k) { await fetch(`${DB_URL}/${k}.json`, {method:'DELETE'}); loadUsers(); }
+        async function delUser(k) { if(confirm("Silinsin?")) { await fetch(`${DB_URL}/${k}.json`, {method:'DELETE'}); loadUsers(); } }
 
         // Oyun Mexanikası
         const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
@@ -143,23 +147,24 @@
                 let r = document.getElementById('r'+i); r.innerHTML = "";
                 for(let j=0; j<3; j++) {
                     let img = (j===1 && i<=count) ? winSym : items[Math.floor(Math.random()*items.length)];
-                    r.innerHTML += `<div class="symbol" id="s-${i-1}-${j}"><img src="${baseUrl+img}" data-sym="${img}"></div>`;
+                    r.innerHTML += `<div class="symbol" id="s-${i-1}-${j}"><img src="${baseUrl+img}"></div>`;
                 }
             }
         }
 
         function handleSpin() {
             if(gameState === "START") {
-                if(balans < 1) { alert("BALANS BİTDİ!"); return; }
+                if(balans < 1) { alert("BALANS BİTDİ!"); autoMode = false; return; }
                 balans -= 1; updateUI(); 
                 document.querySelectorAll('img').forEach(i => i.classList.remove('win-glow'));
-                gameState = "SPIN";
+                gameState = "SPIN"; document.getElementById('main-btn').innerText = "ROLL";
+                
                 let isWin = (Math.random()*100) < winPerc;
                 let winSym = isWin ? items[Math.floor(Math.random()*items.length)] : null;
                 let winCount = isWin ? (Math.random()>0.7 ? 4 : 3) : 0;
                 
                 let ints = [];
-                for(let i=1; i<=5; i++) ints.push(setInterval(() => fillReels(winSym, winCount), 70));
+                for(let i=1; i<=5; i++) ints.push(setInterval(() => fillReels(winSym, winCount), 75));
                 ints.forEach((it, idx) => setTimeout(() => {
                     clearInterval(it);
                     if(idx === 4) finalize(isWin);
@@ -177,12 +182,12 @@
                 gameState = "TAKE"; document.getElementById('main-btn').innerText = "TAKE";
                 document.querySelectorAll('.symbol[id$="-1"] img').forEach(i => i.classList.add('win-glow'));
             } else {
-                gameState = "START";
+                gameState = "START"; document.getElementById('main-btn').innerText = "START";
                 if(autoMode) setTimeout(handleSpin, 600);
             }
         }
 
-        function toggleAuto() { autoMode = !autoMode; document.getElementById('auto-btn').style.background = autoMode ? 'var(--neon)' : 'none'; if(autoMode && gameState === "START") handleSpin(); }
+        function toggleAuto() { autoMode = !autoMode; document.getElementById('auto-btn').style.boxShadow = autoMode ? '0 0 15px var(--neon)' : 'none'; if(autoMode && gameState === "START") handleSpin(); }
     </script>
 </body>
 </html>
