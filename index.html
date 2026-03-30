@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>BABA KAZİNO | Cloud Edition</title>
+    <title>BABA KAZİNO | Pro Management</title>
     <style>
         :root { --gold: #ffcc00; --neon: #39ff14; }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
@@ -23,17 +23,23 @@
         .admin-btn { background: var(--gold); color: black; border: none; padding: 12px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; }
         .user-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; font-size: 14px; align-items: center; }
 
-        /* OYUN SAHƏSİ */
+        /* OYUN SAHƏSİ (Sənin istədiyin dizayn) */
         #game-container { display: none; width: 100%; max-width: 950px; background: linear-gradient(180deg, #1a1a1a 0%, #000 100%); padding: 15px; border: 3px solid #333; border-radius: 15px; position: relative; }
         .reels-wrapper { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 10px; }
         .reel-col { width: 19%; height: 380px; background: #0a0a0a; border: 1px solid #444; border-radius: 8px; overflow: hidden; }
         .symbol { width: 100%; height: 126px; display: flex; align-items: center; justify-content: center; }
         .symbol img { width: 90px; height: 90px; object-fit: contain; }
-        .dash { display: flex; justify-content: space-around; background: #111; border: 2px solid #444; padding: 10px; margin-bottom: 20px; border-radius: 10px; }
-        .info-item { text-align: center; }
-        .info-item span { font-size: 10px; color: #888; display: block; }
-        .info-item strong { font-size: 18px; color: var(--gold); }
-        .start-btn { width: 120px; height: 120px; border-radius: 50%; background: #fff; color: #000; font-size: 22px; font-weight: 900; border: 8px solid #2e7d32; cursor: pointer; }
+        
+        .dash { display: flex; justify-content: space-around; background: linear-gradient(90deg, #111, #222, #111); border: 2px solid #444; padding: 10px; margin-bottom: 20px; border-radius: 10px; }
+        .info-item { text-align: center; min-width: 100px; }
+        .info-item span { display: block; font-size: 11px; color: #888; text-transform: uppercase; }
+        .info-item strong { display: block; font-size: 18px; color: var(--gold); }
+
+        .control-panel { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .btn-rect { background: linear-gradient(180deg, #444, #111); border: 2px solid #666; color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; min-width: 70px; text-align: center; }
+        .avto-btn { width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(#222, #000); border: 4px solid var(--gold); color: white; cursor: pointer; font-size: 12px; }
+        .start-btn { width: 125px; height: 125px; border-radius: 50%; background: #fff; color: #000; font-size: 24px; font-weight: 900; border: 8px solid #2e7d32; cursor: pointer; }
+        
         .win-glow { filter: brightness(1.5) drop-shadow(0 0 15px yellow); transform: scale(1.1); transition: 0.3s; }
     </style>
 </head>
@@ -48,15 +54,13 @@
     </div>
 
     <div id="admin-panel">
-        <h2 style="color:var(--gold); border-bottom: 1px solid #444; padding-bottom: 10px;">BABA ADMIN PANEL</h2>
-        <div style="margin-top: 15px;">
-            <input type="text" id="adm-code" class="admin-input" placeholder="Oyunçu Kodu (4 rəqəm)">
-            <input type="number" id="adm-bal" class="admin-input" placeholder="Yüklənəcək Balans (AZN)">
-            <input type="number" id="adm-perc" class="admin-input" placeholder="Uduş Şansı (1-100%)">
-            <button class="admin-btn" onclick="saveUser()">OYUNÇUNU AKTİV ET</button>
-        </div>
+        <h2 style="color:var(--gold)">BABA ADMIN PANEL</h2>
+        <input type="text" id="adm-code" class="admin-input" placeholder="Oyunçu Kodu">
+        <input type="number" id="adm-bal" class="admin-input" placeholder="Balans">
+        <input type="number" id="adm-perc" class="admin-input" placeholder="Uduş %">
+        <button class="admin-btn" onclick="saveUser()">AKTİV ET</button>
         <div id="user-list" style="margin-top:20px"></div>
-        <button onclick="location.reload()" class="admin-btn" style="background:#444; color:#fff; margin-top:10px">SİSTEMDƏN ÇIX</button>
+        <button onclick="location.reload()" class="admin-btn" style="background:#444; color:#fff; margin-top:10px">ÇIXIŞ</button>
     </div>
 
     <div id="game-container">
@@ -66,18 +70,24 @@
         <div class="dash">
             <div class="info-item"><span>BALANS</span><strong id="bal-val">0.00</strong></div>
             <div class="info-item"><span>UDUŞ</span><strong id="win-val" style="color:var(--neon)">0.00</strong></div>
-            <div class="info-item"><span>MƏRC</span><strong>1.00</strong></div>
+            <div class="info-item"><span>MƏRC</span><strong id="bet-total-val">1.00</strong></div>
         </div>
-        <div style="display:flex; justify-content:center; gap:30px; align-items:center;">
-            <button onclick="toggleAuto()" id="auto-btn" style="background:none; border:2px solid var(--gold); color:white; width:60px; height:60px; border-radius:50%; font-size: 10px;">AVTO</button>
+        <div class="control-panel">
+            <button class="btn-rect">RİSK</button>
+            <button class="avto-btn" id="auto-btn" onclick="toggleAuto()">AVTO</button>
             <button class="start-btn" id="main-btn" onclick="handleSpin()">START</button>
+            <div style="display:flex; gap:8px;">
+                <button class="btn-rect">XƏTT<br><b>20</b></button>
+                <button class="btn-rect" onclick="changeBet()">MƏRC<br><b id="bet-val">1.00</b></button>
+            </div>
         </div>
     </div>
 
     <script>
         const DB_URL = "https://babacasino-9fca0-default-rtdb.firebaseio.com/users";
-        const ADMIN_PASS = "0071"; // YENİ ADMIN KODUN
-        let currentUser = null, balans = 0, winPerc = 20, inputCode = "", gameState = "START", autoMode = false, currentWin = 0;
+        const ADMIN_PASS = "0071";
+        let currentUser = null, balans = 0, winPerc = 20, inputCode = "", gameState = "START", autoMode = false, currentWin = 0, activeBet = 1.00;
+        const bets = [1, 2, 5, 10, 20, 50, 100];
 
         // Keypad
         const keyArea = document.getElementById('keys');
@@ -85,9 +95,9 @@
             let b = document.createElement('button'); b.className = 'key-btn'; b.innerText = k;
             if(k === 'OK') b.className += ' key-ok';
             b.onclick = () => {
-                if(k === 'C') { inputCode = ""; }
-                else if(k === 'OK') { checkLogin(); }
-                else { if(inputCode.length < 6) inputCode += k; }
+                if(k === 'C') inputCode = "";
+                else if(k === 'OK') checkLogin();
+                else if(inputCode.length < 6) inputCode += k;
                 document.getElementById('code-display').innerText = "*".repeat(inputCode.length) || "****";
             };
             keyArea.appendChild(b);
@@ -112,27 +122,27 @@
         }
 
         async function saveUser() {
-            let c = document.getElementById('adm-code').value;
-            let b = document.getElementById('adm-bal').value;
-            let p = document.getElementById('adm-perc').value;
-            if(!c || !b) return alert("Məlumatları doldur!");
+            let c = document.getElementById('adm-code').value, b = document.getElementById('adm-bal').value, p = document.getElementById('adm-perc').value;
+            if(!c || !b) return alert("Məlumat doldur!");
             await fetch(`${DB_URL}/${c}.json`, { method: 'PUT', body: JSON.stringify({bal: parseFloat(b), perc: parseInt(p || 20)}) });
-            document.getElementById('adm-code').value = ""; document.getElementById('adm-bal').value = "";
             loadUsers();
         }
 
         async function loadUsers() {
-            let res = await fetch(`${DB_URL}.json`);
-            let data = await res.json();
-            let list = document.getElementById('user-list'); list.innerHTML = "<h3 style='font-size:12px; color:#888; margin:10px 0'>AKTİV OYUNÇULAR:</h3>";
-            for(let k in data) {
-                list.innerHTML += `<div class="user-row"><span><b>${k}</b>: ${data[k].bal.toFixed(2)} AZN (${data[k].perc}%)</span><button onclick="delUser('${k}')" style="color:red; border:none; background:none; font-weight:bold; cursor:pointer">SİL</button></div>`;
-            }
+            let res = await fetch(`${DB_URL}.json`), data = await res.json(), list = document.getElementById('user-list');
+            list.innerHTML = "";
+            for(let k in data) list.innerHTML += `<div class="user-row"><span>${k}: ${data[k].bal.toFixed(2)} AZN</span><button onclick="delUser('${k}')" style="color:red; background:none; border:none;">SİL</button></div>`;
         }
 
-        async function delUser(k) { if(confirm("Silinsin?")) { await fetch(`${DB_URL}/${k}.json`, {method:'DELETE'}); loadUsers(); } }
+        async function delUser(k) { await fetch(`${DB_URL}/${k}.json`, {method:'DELETE'}); loadUsers(); }
 
-        // Oyun Mexanikası
+        function changeBet() {
+            let idx = bets.indexOf(activeBet);
+            activeBet = bets[(idx + 1) % bets.length];
+            document.getElementById('bet-val').innerText = activeBet.toFixed(2);
+            document.getElementById('bet-total-val').innerText = activeBet.toFixed(2);
+        }
+
         const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
         const items = ["7.png.jpeg", "gavali.png.jpeg", "limon.png.jpeg", "portagal.png.jpeg", "qarpiz.png.jpeg", "ulduz.png.jpeg", "uzum.png.jpeg"];
 
@@ -147,17 +157,17 @@
                 let r = document.getElementById('r'+i); r.innerHTML = "";
                 for(let j=0; j<3; j++) {
                     let img = (j===1 && i<=count) ? winSym : items[Math.floor(Math.random()*items.length)];
-                    r.innerHTML += `<div class="symbol" id="s-${i-1}-${j}"><img src="${baseUrl+img}"></div>`;
+                    r.innerHTML += `<div class="symbol"><img src="${baseUrl+img}" id="s-${i-1}-${j}"></div>`;
                 }
             }
         }
 
         function handleSpin() {
             if(gameState === "START") {
-                if(balans < 1) { alert("BALANS BİTDİ!"); autoMode = false; return; }
-                balans -= 1; updateUI(); 
+                if(balans < activeBet) { alert("BALANS ÇATMIR!"); autoMode = false; return; }
+                balans -= activeBet; updateUI();
                 document.querySelectorAll('img').forEach(i => i.classList.remove('win-glow'));
-                gameState = "SPIN"; document.getElementById('main-btn').innerText = "ROLL";
+                gameState = "SPIN"; document.getElementById('main-btn').innerText = "...";
                 
                 let isWin = (Math.random()*100) < winPerc;
                 let winSym = isWin ? items[Math.floor(Math.random()*items.length)] : null;
@@ -178,9 +188,10 @@
 
         function finalize(isWin) {
             if(isWin) {
-                currentWin = 5.00; updateUI(currentWin);
+                currentWin = activeBet * 5; // Sadə uduş məntiqi: Mərc x 5
+                updateUI(currentWin);
                 gameState = "TAKE"; document.getElementById('main-btn').innerText = "TAKE";
-                document.querySelectorAll('.symbol[id$="-1"] img').forEach(i => i.classList.add('win-glow'));
+                document.querySelectorAll('.symbol img').forEach((img, idx) => { if(idx % 3 === 1) img.classList.add('win-glow'); });
             } else {
                 gameState = "START"; document.getElementById('main-btn').innerText = "START";
                 if(autoMode) setTimeout(handleSpin, 600);
