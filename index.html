@@ -3,62 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>BABA KAZİNO | Pro Auto-Login System</title>
+    <title>BABA KAZİNO | Pro Star System</title>
     <style>
         :root { --gold: #ffcc00; --neon: #39ff14; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; touch-action: manipulation; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
         body { background: #000; color: white; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
-        /* SEÇİM MENYUSU */
-        #picker-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; display: none; align-items: center; justify-content: center; }
-        .picker-content { background: #222; border: 3px solid #444; border-radius: 15px; padding: 20px; width: 90%; max-width: 400px; text-align: center; }
-        .picker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; max-height: 300px; overflow-y: auto; }
-        .picker-item { background: #333; border: 1px solid #555; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .picker-item:hover { background: var(--gold); color: black; }
+        /* GİRİŞ SİSTEMİ */
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .keypad-container { width: 320px; background: #222; border: 4px solid #444; border-radius: 15px; padding: 20px; text-align: center; }
+        .access-screen { background: #001a00; border: 2px solid #004400; height: 50px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #0f0; letter-spacing: 5px; border-radius: 5px; }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .key-btn { background: #333; border: 1px solid #555; border-radius: 8px; height: 60px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; }
 
         /* OYUN SAHƏSİ */
         #game-container { display: none; width: 100%; max-width: 950px; background: #111; padding: 15px; border: 3px solid #333; border-radius: 15px; position: relative; }
         .reels-wrapper { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 20px; padding: 10px; background: #000; border-radius: 10px; position: relative; }
         .reel-col { width: 19%; height: 380px; background: #0a0a0a; border: 1px solid #333; border-radius: 5px; overflow: hidden; }
         .symbol { width: 100%; height: 126px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .symbol img { width: 95px; height: 95px; object-fit: contain; }
+        .symbol img { width: 95px; height: 95px; object-fit: contain; transition: 0.3s; }
 
-        .win-line-overlay { position: absolute; height: 8px; background: #fbff00; box-shadow: 0 0 15px #fbff00; z-index: 100; border-radius: 4px; display: none; }
+        /* UDUŞ XƏTTİ */
+        .win-line-overlay { position: absolute; height: 8px; background: #fbff00; box-shadow: 0 0 15px #fbff00; z-index: 100; border-radius: 4px; pointer-events: none; display: none; }
 
         .dash { display: flex; justify-content: space-around; background: #222; border: 2px solid #444; padding: 10px; margin-bottom: 15px; border-radius: 10px; }
         .info-item { text-align: center; }
         .info-item span { display: block; font-size: 11px; color: #888; text-transform: uppercase; }
         .info-item strong { display: block; font-size: 18px; color: var(--gold); }
 
+        /* CONTROL PANEL */
         .control-panel { display: flex; justify-content: space-between; align-items: center; gap: 5px; }
-        .btn-rect { background: #333; border: 2px solid #555; color: white; padding: 8px 5px; border-radius: 8px; cursor: pointer; font-weight: bold; min-width: 75px; text-align: center; font-size: 12px; }
-        .main-btn { width: 110px; height: 110px; border-radius: 50%; border: 10px solid #1b5e20; background: #fff; color: #000; font-size: 18px; font-weight: 900; cursor: pointer; }
+        .btn-rect { background: #333; border: 2px solid #555; color: white; padding: 8px 5px; border-radius: 8px; cursor: pointer; font-weight: bold; min-width: 70px; text-align: center; font-size: 12px; }
+        .main-btn { width: 110px; height: 110px; border-radius: 50%; border: 10px solid #1b5e20; background: #fff; color: #000; font-size: 18px; font-weight: 900; cursor: pointer; flex-shrink: 0; }
         .main-btn.stop { border-color: #b71c1c; background: #ff5252; color: #fff; }
         .main-btn.take { border-color: #fbc02d; background: #ffeb3b; color: #000; animation: flash 0.8s infinite; }
 
         @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .win-glow { filter: brightness(1.3) drop-shadow(0 0 15px #fbff00); transform: scale(1.1); }
         .star-glow { filter: brightness(1.5) drop-shadow(0 0 25px #ffcc00); animation: starPulse 0.5s infinite alternate; }
         @keyframes starPulse { from { transform: scale(1.1); } to { transform: scale(1.2); } }
-
-        /* GİRİŞ SİSTEMİ */
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .access-screen { background: #001a00; border: 2px solid #004400; height: 50px; width: 280px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #0f0; letter-spacing: 5px; border-radius: 5px; }
-        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 280px; }
-        .key-btn { background: #333; border: 1px solid #555; border-radius: 8px; height: 60px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="picker-overlay" onclick="closePicker()">
-        <div class="picker-content" onclick="event.stopPropagation()">
-            <h3 id="picker-title">SEÇİN</h3>
-            <div class="picker-grid" id="picker-grid"></div>
-        </div>
-    </div>
-
     <div id="login-overlay">
-        <div class="access-screen" id="code-display">****</div>
-        <div class="keypad-grid" id="keys"></div>
+        <div class="keypad-container">
+            <div class="access-screen" id="code-display">****</div>
+            <div class="keypad-grid" id="keys"></div>
+        </div>
     </div>
 
     <div id="game-container">
@@ -77,50 +69,29 @@
             <button class="btn-rect">RİSK</button>
             <button class="btn-rect" onclick="toggleAuto()" id="auto-btn">AVTO</button>
             <button class="main-btn" id="main-btn" onclick="handleAction()">START</button>
-            <button class="btn-rect" onclick="openLinePicker()">XƏTT<br><b id="line-val">20</b></button>
-            <button class="btn-rect" onclick="openBetPicker()">MƏRC<br><b id="bet-val">0.01</b></button>
+            <button class="btn-rect" onclick="changeLines()">XƏTT<br><b id="line-val">20</b></button>
+            <button class="btn-rect" onclick="changeBet()">MƏRC<br><b id="bet-val">0.01</b></button>
         </div>
     </div>
 
     <script>
         const DB_URL = "https://babacasino-9fca0-default-rtdb.firebaseio.com/users";
-        let currentUser = null, balans = 0, inputCode = "", gameState = "START", autoMode = false;
+        let currentUser = null, balans = 0, winPerc = 25, inputCode = "", gameState = "START", autoMode = false;
+        
         let activeLine = 20;
-        let activeBet = 0.01;
+        let betIndex = 0;
         const betList = [0.01, 0.10, 0.30, 0.50, 0.70, 1.00, 2.00, 5.00, 10.00, 20.00, 50.00, 100.00, 200.00];
-        let currentWin = 0, spinCount = 0;
+        let currentWin = 0;
+        let spinCount = 0; // Fırlatma sayğacı
 
         const items = ["7.png.jpeg", "gavali.png.jpeg", "limon.png.jpeg", "portagal.png.jpeg", "qarpiz.png.jpeg", "ulduz.png.jpeg", "uzum.png.jpeg"];
         const baseUrl = "https://raw.githubusercontent.com/kenanismayilov5133-cpu/babacasino/main/simvollar/";
-        let intervals = [null,null,null,null,null], stopTimeouts = [];
+        
+        let intervals = [null, null, null, null, null];
+        let stopTimeouts = [];
 
-        // GİRİŞ VƏ AVTO-YARATMA SİSTEMİ
-        async function checkLogin() {
-            try {
-                let res = await fetch(`${DB_URL}/${inputCode}.json`);
-                let data = await res.json();
-                
-                // Əgər kod bazada yoxdursa, avtomatik yarat (10 AZN balansla)
-                if(!data) {
-                    data = { bal: 10.00, perc: 25 };
-                    await fetch(`${DB_URL}/${inputCode}.json`, { 
-                        method: 'PUT', 
-                        body: JSON.stringify(data) 
-                    });
-                }
-
-                currentUser = inputCode; 
-                balans = data.bal;
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('game-container').style.display = 'block';
-                updateUI(); 
-                fillReels();
-            } catch(e) { 
-                alert("İnternet və ya Firebase xətası!"); 
-            }
-        }
-
-        // KEYPAD QURULMASI
+        // KEYPAD
+        const keyArea = document.getElementById('keys');
         [1,2,3,4,5,6,7,8,9,'C',0,'OK'].forEach(k => {
             let b = document.createElement('button'); b.className = 'key-btn'; b.innerText = k;
             b.onclick = () => {
@@ -129,45 +100,44 @@
                 else if(inputCode.length < 4) inputCode += k;
                 document.getElementById('code-display').innerText = "*".repeat(inputCode.length) || "****";
             };
-            document.getElementById('keys').appendChild(b);
+            keyArea.appendChild(b);
         });
 
-        // SEÇİM FUNKSİYALARI
-        function openLinePicker() {
-            const grid = document.getElementById('picker-grid');
-            grid.innerHTML = "";
-            document.getElementById('picker-title').innerText = "XƏTT SAYINI SEÇİN";
-            for(let i=1; i<=20; i++) {
-                let d = document.createElement('div'); d.className = 'picker-item'; d.innerText = i;
-                d.onclick = () => { activeLine = i; document.getElementById('line-val').innerText = i; closePicker(); updateUI(); };
-                grid.appendChild(d);
-            }
-            document.getElementById('picker-overlay').style.display = 'flex';
+        async function checkLogin() {
+            try {
+                let res = await fetch(`${DB_URL}/${inputCode}.json`);
+                let data = await res.json();
+                if(data) {
+                    currentUser = inputCode; balans = data.bal; winPerc = data.perc;
+                    document.getElementById('login-overlay').style.display = 'none';
+                    document.getElementById('game-container').style.display = 'block';
+                    updateUI(); fillReels();
+                } else { alert("KOD SƏHVDİR!"); inputCode = ""; }
+            } catch(e) { alert("Xəta!"); }
         }
 
-        function openBetPicker() {
-            const grid = document.getElementById('picker-grid');
-            grid.innerHTML = "";
-            document.getElementById('picker-title').innerText = "MƏRCİ SEÇİN";
-            betList.forEach(b => {
-                let d = document.createElement('div'); d.className = 'picker-item'; d.innerText = b.toFixed(2);
-                d.onclick = () => { activeBet = b; document.getElementById('bet-val').innerText = b.toFixed(2); closePicker(); updateUI(); };
-                grid.appendChild(d);
-            });
-            document.getElementById('picker-overlay').style.display = 'flex';
+        function changeLines() {
+            activeLine = activeLine >= 20 ? 1 : activeLine + 1;
+            document.getElementById('line-val').innerText = activeLine;
+            updateTotalBetUI();
         }
 
-        function closePicker() { document.getElementById('picker-overlay').style.display = 'none'; }
-
-        function updateUI(w=0) {
-            document.getElementById('bal-val').innerText = balans.toFixed(2);
-            document.getElementById('win-val').innerText = w.toFixed(2);
-            document.getElementById('bet-total').innerText = (activeLine * activeBet).toFixed(2);
-            if(currentUser) fetch(`${DB_URL}/${currentUser}/bal.json`, { method: 'PUT', body: balans });
+        function changeBet() {
+            betIndex = (betIndex + 1) % betList.length;
+            document.getElementById('bet-val').innerText = betList[betIndex].toFixed(2);
+            updateTotalBetUI();
         }
 
-        function fillReels(sReel = null) {
-            const start = sReel ? sReel : 1; const end = sReel ? sReel : 5;
+        function updateTotalBetUI() {
+            let total = activeLine * betList[betIndex];
+            document.getElementById('bet-total').innerText = total.toFixed(2);
+        }
+
+        function fillReels(specificReel = null) {
+            const start = specificReel ? specificReel : 1;
+            const end = specificReel ? specificReel : 5;
+            
+            // Hər fırlatmadan əvvəl ulduz sayını sıfırla (bu sadəcə vizual fırlanmadır)
             for(let i=start; i<=end; i++) {
                 let r = document.getElementById('r'+i); r.innerHTML = "";
                 for(let j=0; j<3; j++) {
@@ -177,51 +147,92 @@
             }
         }
 
+        function updateUI(w=0) {
+            document.getElementById('bal-val').innerText = balans.toFixed(2);
+            document.getElementById('win-val').innerText = w.toFixed(2);
+            if(currentUser) fetch(`${DB_URL}/${currentUser}/bal.json`, { method: 'PUT', body: balans });
+            updateTotalBetUI();
+        }
+
         function handleAction() {
             const btn = document.getElementById('main-btn');
-            let totalB = activeLine * activeBet;
+            let totalBet = activeLine * betList[betIndex];
+
             if(gameState === "START") {
-                if(balans < totalB) return alert("BALANS AZDIR!");
-                balans -= totalB; updateUI(); clearWinEffects();
-                spinCount++; gameState = "SPIN"; btn.innerText = "STOP"; btn.classList.add('stop');
+                if(balans < totalBet) return alert("Balans yetərli deyil!");
+                balans -= totalBet; updateUI(); clearWinEffects();
+                spinCount++; // Hər START-da sayğacı artır
+                gameState = "SPIN";
+                btn.innerText = "STOP"; btn.classList.add('stop');
+                
                 for(let i=1; i<=5; i++) intervals[i-1] = setInterval(() => fillReels(i), 70);
+                
                 for(let i=1; i<=5; i++) {
-                    let t = setTimeout(() => { clearInterval(intervals[i-1]); if(i===5) checkPayout(); }, 600+(i*400));
+                    let t = setTimeout(() => {
+                        clearInterval(intervals[i-1]);
+                        if(i === 5) checkPayout();
+                    }, 600 + (i*400));
                     stopTimeouts.push(t);
                 }
-            } else if(gameState === "SPIN") {
+            } 
+            else if(gameState === "SPIN") {
                 stopTimeouts.forEach(clearTimeout); intervals.forEach(clearInterval);
+                stopTimeouts = [];
                 for(let i=1; i<=5; i++) fillReels(i);
                 checkPayout();
-            } else if(gameState === "TAKE") {
+            } 
+            else if(gameState === "TAKE") {
                 balans += currentWin; currentWin = 0; updateUI();
                 gameState = "START"; btn.innerText = "START"; btn.classList.remove('take');
-                clearWinEffects(); if(autoMode) setTimeout(handleAction, 500);
+                clearWinEffects();
+                if(autoMode) setTimeout(handleAction, 500);
             }
         }
 
         function checkPayout() {
-            let totalW = 0, winD = [], totalB = activeLine * activeBet;
-            let isStar = (spinCount % 15 === 0);
-            if(isStar) { forceStarWin(); totalW += totalB * 2; }
+            let totalWin = 0;
+            let winDetails = [];
+            let singleBet = betList[betIndex];
+            let totalBetValue = activeLine * singleBet;
+
+            // XÜSUSİ ULDUZ MƏNTİQİ (Hər 15 spin-dən bir 3 ulduz)
+            let isStarWin = (spinCount % 15 === 0);
+            if(isStarWin) {
+                forceStarWin();
+                totalWin += totalBetValue * 2; // Oynadığı summanın 2 qatı
+            }
+
+            // Normal sətir yoxlaması
             for (let row = 0; row < 3; row++) {
-                let first = document.getElementById(`s-0-${row}`).dataset.sym, match = 1;
+                let firstSym = document.getElementById(`s-0-${row}`).dataset.sym;
+                let matchCount = 1;
                 for (let col = 1; col < 5; col++) {
-                    if (document.getElementById(`s-${col}-${row}`).dataset.sym === first) match++; else break;
+                    if (document.getElementById(`s-${col}-${row}`).dataset.sym === firstSym) matchCount++;
+                    else break;
                 }
-                if (match >= 3) {
-                    let mult = (first === "7.png.jpeg") ? (match===3?50:(match===4?100:200)) : (match===3?3:(match===4?10:50));
-                    totalW += activeBet * mult; winD.push({row, match});
+                if (matchCount >= 3) {
+                    let mult = 0;
+                    if (firstSym === "7.png.jpeg") mult = (matchCount === 3) ? 50 : (matchCount === 4 ? 100 : 200);
+                    else mult = (matchCount === 3) ? 3 : (matchCount === 4 ? 10 : 50);
+                    totalWin += singleBet * mult;
+                    winDetails.push({row, matchCount});
                 }
             }
+
+            // Ekranda neçə ulduz var yoxla (Əgər forceStarWin olmasa belə)
             let stars = document.querySelectorAll('.symbol[data-sym="ulduz.png.jpeg"]');
-            if(stars.length === 3 && !isStar) { totalW += totalB * 2; stars.forEach(s => s.querySelector('img').classList.add('star-glow')); }
-            
-            if (totalW > 0) {
-                currentWin = totalW; updateUI(currentWin); gameState = "TAKE";
+            if(stars.length === 3 && !isStarWin) {
+                totalWin += totalBetValue * 2;
+                stars.forEach(s => s.querySelector('img').classList.add('star-glow'));
+            }
+
+            if (totalWin > 0) {
+                currentWin = totalWin; updateUI(currentWin);
+                gameState = "TAKE";
                 document.getElementById('main-btn').innerText = "TAKE";
+                document.getElementById('main-btn').classList.remove('stop');
                 document.getElementById('main-btn').classList.add('take');
-                applyWinVisuals(winD);
+                applyWinVisuals(winDetails);
             } else {
                 gameState = "START"; document.getElementById('main-btn').innerText = "START";
                 document.getElementById('main-btn').classList.remove('stop');
@@ -230,28 +241,46 @@
         }
 
         function forceStarWin() {
-            let pos = []; while(pos.length < 3) {
-                let p = { r: Math.floor(Math.random()*5), s: Math.floor(Math.random()*3) };
-                if(!pos.find(x => x.r === p.r && x.s === p.s)) pos.push(p);
+            // Ekranda bütün ulduzları təmizlə
+            document.querySelectorAll('.symbol').forEach(s => {
+                if(s.dataset.sym === "ulduz.png.jpeg") {
+                   let randomSym = items[Math.floor(Math.random() * (items.length - 1))];
+                   s.dataset.sym = randomSym;
+                   s.querySelector('img').src = baseUrl + randomSym;
+                }
+            });
+
+            // Təsadüfi 3 fərqli çarxda və sətirdə ulduz yerləşdir
+            let positions = [];
+            while(positions.length < 3) {
+                let pos = { r: Math.floor(Math.random()*5), s: Math.floor(Math.random()*3) };
+                if(!positions.find(p => p.r === pos.r && p.s === pos.s)) positions.push(pos);
             }
-            pos.forEach(p => {
-                let s = document.getElementById(`s-${p.r}-${p.s}`);
-                s.dataset.sym = "ulduz.png.jpeg"; s.querySelector('img').src = baseUrl + "ulduz.png.jpeg";
-                s.querySelector('img').classList.add('star-glow');
+
+            positions.forEach(p => {
+                let slot = document.getElementById(`s-${p.r}-${p.s}`);
+                slot.dataset.sym = "ulduz.png.jpeg";
+                slot.querySelector('img').src = baseUrl + "ulduz.png.jpeg";
+                slot.querySelector('img').classList.add('star-glow');
             });
         }
 
         function applyWinVisuals(details) {
-            details.forEach(w => {
-                const l = document.getElementById(`line-${w.row}`);
-                l.style.display = 'block'; l.style.top = (63 + (w.row * 126)) + 'px';
-                l.style.left = '5%'; l.style.width = (w.match * 19) + '%';
+            details.forEach(win => {
+                const line = document.getElementById(`line-${win.row}`);
+                line.style.display = 'block';
+                line.style.top = (63 + (win.row * 126)) + 'px';
+                line.style.left = '5%';
+                line.style.width = (win.matchCount * 19) + '%';
+                for (let c = 0; c < win.matchCount; c++) {
+                    document.querySelector(`#s-${c}-${win.row} img`).classList.add('win-glow');
+                }
             });
         }
 
         function clearWinEffects() {
-            document.querySelectorAll('.win-line-overlay').forEach(l => l.style.display='none');
-            document.querySelectorAll('img').forEach(i => i.classList.remove('star-glow'));
+            document.querySelectorAll('.win-line-overlay').forEach(l => l.style.display = 'none');
+            document.querySelectorAll('.symbol img').forEach(i => i.classList.remove('win-glow', 'star-glow'));
         }
 
         function toggleAuto() {
