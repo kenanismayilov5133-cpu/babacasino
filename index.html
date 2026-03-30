@@ -2,11 +2,19 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <title>BABA KAZİNO | Pro Edition</title>
     <style>
         :root { --gold: #ffcc00; --neon: #39ff14; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', sans-serif; 
+            /* TEZ-TEZ BASANDA YAXINLAŞMANI LƏĞV EDİR */
+            touch-action: manipulation; 
+            -webkit-tap-highlight-color: transparent;
+        }
         body { background: #000; color: white; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
 
         /* GİRİŞ */
@@ -14,7 +22,7 @@
         .keypad-container { width: 320px; background: #222; border: 4px solid #444; border-radius: 15px; padding: 20px; text-align: center; }
         .access-screen { background: #001a00; border: 2px solid #004400; height: 50px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #0f0; letter-spacing: 5px; border-radius: 5px; }
         .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .key-btn { background: #333; border: 1px solid #555; border-radius: 8px; height: 60px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; }
+        .key-btn { background: #333; border: 1px solid #555; border-radius: 8px; height: 60px; color: white; font-size: 22px; font-weight: bold; cursor: pointer; user-select: none; -webkit-user-select: none; }
         .key-ok { background: #004400; color: #0f0; border-color: #0f0; }
 
         /* OYUN */
@@ -30,10 +38,10 @@
         .info-item strong { display: block; font-size: 18px; color: var(--gold); }
 
         .control-panel { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .btn-rect { background: linear-gradient(180deg, #444, #111); border: 2px solid #666; color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; }
-        .avto-btn { width: 85px; height: 85px; border-radius: 50%; background: radial-gradient(#222, #000); border: 4px solid var(--gold); color: white; cursor: pointer; font-size: 14px; }
+        .btn-rect { background: linear-gradient(180deg, #444, #111); border: 2px solid #666; color: white; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; user-select: none; -webkit-user-select: none; }
+        .avto-btn { width: 85px; height: 85px; border-radius: 50%; background: radial-gradient(#222, #000); border: 4px solid var(--gold); color: white; cursor: pointer; font-size: 14px; user-select: none; }
         .avto-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 15px var(--neon); }
-        .start-btn { width: 130px; height: 130px; border-radius: 50%; background: #fff; color: #000; font-size: 24px; font-weight: 900; border: 8px solid #2e7d32; cursor: pointer; }
+        .start-btn { width: 130px; height: 130px; border-radius: 50%; background: #fff; color: #000; font-size: 24px; font-weight: 900; border: 8px solid #2e7d32; cursor: pointer; user-select: none; -webkit-user-select: none; }
 
         .picker-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .picker-box { background: #222; padding: 20px; border: 2px solid var(--gold); border-radius: 15px; width: 90%; max-width: 500px; text-align: center; }
@@ -90,16 +98,17 @@
     </div>
 
     <script>
-        const users = { "1111": { bal: 5000.00, winPercent: 85 } };
-        let balans = 0, activeLine = 20, activeBet = 1.00, currentWin = 0, inputCode = "", autoMode = false, gameState = "START";
+        const users = { 
+            "1111": { bal: 5000.00, winPercent: 85 },
+            "1765": { bal: 50.00, winPercent: 30 },
+            "6547": { bal: 10.00, winPercent: 15 },
+            "1587": { bal: 25.00, winPercent: 80 }
+        };
 
-        // SENİN DEDİYİN DƏQİQ MƏBLƏĞLƏR
+        let balans = 0, activeLine = 20, activeBet = 1.00, currentWin = 0, inputCode = "", autoMode = false, gameState = "START", myWinPercent = 35;
         const betSteps = [0.10, 0.20, 0.30, 0.40, 0.50, 1.00, 2.00, 5.00, 10.00, 30.00, 50.00, 100.00, 150.00, 200.00];
 
-        function getBetAmount() {
-            // Bahis seçimini 20 xətt üzərindən hesablayırıq ki, Max 200 AZN olsun
-            return (activeLine / 20) * activeBet;
-        }
+        function getBetAmount() { return (activeLine / 20) * activeBet; }
 
         function updateUI(win = 0) {
             document.getElementById('bal-val').innerText = balans.toFixed(2) + " AZN";
@@ -107,6 +116,7 @@
             document.getElementById('bet-total-val').innerText = getBetAmount().toFixed(2) + " AZN";
             document.getElementById('line-display').innerText = activeLine;
             document.getElementById('bet-display').innerText = activeBet.toFixed(2);
+            if(inputCode) localStorage.setItem('baba_pro_v2_bal_' + inputCode, balans);
         }
 
         function openPicker(type) {
@@ -122,17 +132,17 @@
             document.getElementById('picker-modal').style.display = 'flex';
         }
 
-        function setPicker(type, val) { 
-            if(type === 'line') activeLine = val; else activeBet = val; 
-            updateUI(); closePicker(); 
-        }
+        function setPicker(type, val) { if(type === 'line') activeLine = val; else activeBet = val; updateUI(); closePicker(); }
         function closePicker() { document.getElementById('picker-modal').style.display = 'none'; }
         
         function pressKey(num) { if(inputCode.length < 4) { inputCode += num; document.getElementById('code-display').innerText = "*".repeat(inputCode.length); } }
         function resetKeypad() { inputCode = ""; document.getElementById('code-display').innerText = "****"; }
+        
         function checkCode() {
             if(users[inputCode]) {
-                balans = users[inputCode].bal;
+                let saved = localStorage.getItem('baba_pro_v2_bal_' + inputCode);
+                balans = saved ? parseFloat(saved) : users[inputCode].bal;
+                myWinPercent = users[inputCode].winPercent;
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('game-container').style.display = 'block';
                 updateUI(); fillInitialReels();
@@ -160,11 +170,11 @@
 
         function startSpin() {
             let bet = getBetAmount();
-            if (balans < bet) return;
+            if (balans < bet) { autoMode = false; document.getElementById('auto-btn').classList.remove('active'); alert("Balans çatmır!"); return; }
             clearWinEffects(); balans -= bet; updateUI(0);
             gameState = "STOP"; updateBtn("STOP", "state-stop");
 
-            let isWin = Math.random() < 0.35;
+            let isWin = (Math.random() * 100) < myWinPercent;
             let winSym = isWin ? items[Math.floor(Math.random() * items.length)] : null;
             let count = isWin ? (Math.random() > 0.8 ? 4 : 3) : 0;
 
